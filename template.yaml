@@ -28,7 +28,7 @@ Resources:
           ToPort: 5432
           IpProtocol: tcp
           CidrIp: 0.0.0.0/0
-      VpcId: vpc-049cedfe91fc7cc5b
+      VpcId: vpc-07badc8cca95093b3
   DebateItDBSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
@@ -41,28 +41,23 @@ Resources:
         ExcludeCharacters: '"@/\'
         ExcludePunctuation: true
   DebateItDB:
-    Type: AWS::RDS::DBCluster
-    Properties: 
-      BackupRetentionPeriod: 7
-      DatabaseName: !Ref DatabaseNameParameter
-      PubliclyAccessible: true
-      DBClusterIdentifier: !Sub "debateitdb-${EnvironmentParameter}"
-      EnableHttpEndpoint: true
-      Engine: aurora-postgresql
-      EngineMode: serverless
-      EngineVersion: 11.13
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: 20
+      DBName: !Ref DatabaseNameParameter
+      DBInstanceIdentifier: !Sub "debateitdb-${EnvironmentParameter}"
+      DBInstanceClass: "db.t3.micro"
+      DBSubnetGroupName: public-subnet-group
+      Engine: postgres
       MasterUsername: !Sub '{{resolve:secretsmanager:${DebateItDBSecret}::username}}'
       MasterUserPassword: !Sub '{{resolve:secretsmanager:${DebateItDBSecret}::password}}'
-      ScalingConfiguration:
-        AutoPause: false
-        MaxCapacity: 2
-        MinCapacity: 2
+      PubliclyAccessible: true
       SourceRegion: us-east-1
-      VpcSecurityGroupIds: [!Ref DBSecurityGroup]
+      VPCSecurityGroups: [!Ref DBSecurityGroup]
   DebateItDBSecretAttachment:
     Type: AWS::SecretsManager::SecretTargetAttachment
     Properties: 
       SecretId: !Ref DebateItDBSecret
       TargetId: !Ref DebateItDB
-      TargetType: AWS::RDS::DBCluster
+      TargetType: AWS::RDS::DBInstance
 
