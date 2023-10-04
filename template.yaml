@@ -45,7 +45,7 @@ Resources:
     Properties: 
       BackupRetentionPeriod: 7
       DatabaseName: !Ref DatabaseNameParameter
-      DBSubnetGroupName: default-vpc-049cedfe91fc7cc5b
+      PubliclyAccessible: true
       DBClusterIdentifier: !Sub "debateitdb-${EnvironmentParameter}"
       EnableHttpEndpoint: true
       Engine: aurora-postgresql
