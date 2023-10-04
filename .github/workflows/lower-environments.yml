@@ -9,15 +9,14 @@ on:
             - '!main'
 
 jobs:
-    build:
+    deploy:
         runs-on: ubuntu-latest
-
         steps:
             - uses: actions/checkout@v3
             - name: Extract branch name
               shell: bash
               run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-              id: extract_branch
+              id: extract_branch 
             - uses: aws-actions/setup-sam@v2
               with:
                 use-installer: true
@@ -28,3 +27,26 @@ jobs:
                 aws-region: us-east-1
             - run: sam build --use-container
             - run: sam deploy packaged.yaml --parameter-overrides "EnvironmentParameter=${{ steps.extract_branch.outputs.branch }}" --stack-name debateit-api-${{ steps.extract_branch.outputs.branch }} --no-confirm-changeset --no-fail-on-empty-changeset
+    migrate:
+      runs-on: ubuntu-latest
+      defaults:
+        run:
+          working-directory: ./db
+      steps:
+        - uses: actions/checkout@v3
+        - uses: actions/setup-python@v4
+          with:
+            python-version: '3.11'
+        - run: python3 -m pip install alembic aws-lambda-powertools
+        - uses: aws-actions/configure-aws-credentials@v2
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: us-east-1
+        - run: ./migrate.sh
+        - name: Commit changes
+          uses: EndBug/add-and-commit@v9
+          with:
+            message: Created new migration
+            committer_name: GitHub Actions
+            committer_email: actions@github.com
