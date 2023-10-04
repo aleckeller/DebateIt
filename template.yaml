@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  DebateIt API
+
+  SAM Template for DebateIt API
+
+Parameters:
+  EnvironmentParameter:
+    Type: String
+  DatabaseNameParameter:
+    Type: String
+    Default: debateitdb
+
+Resources:
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: Security Group for the Database
+      GroupName: !Sub "debateit-db-sg-${EnvironmentParameter}"
+      SecurityGroupEgress: 
+        - Description: Allow all outbound traffic
+          IpProtocol: "-1"
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+        - Description: Allow all access for now
+          FromPort: 5432
+          ToPort: 5432
+          IpProtocol: tcp
+          CidrIp: 0.0.0.0/0
+      VpcId: vpc-049cedfe91fc7cc5b
+  DebateItDBSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "debateitdb-secret-${EnvironmentParameter}"
+      Description: RDS database auto-generated user password
+      GenerateSecretString:
+        SecretStringTemplate: !Sub '{"username": "debateitdbowner"}'
+        GenerateStringKey: "password"
+        PasswordLength: 30
+        ExcludeCharacters: '"@/\'
+        ExcludePunctuation: true
+  DebateItDB:
+    Type: AWS::RDS::DBCluster
+    Properties: 
+      BackupRetentionPeriod: 7
+      DatabaseName: !Ref DatabaseNameParameter
+      DBSubnetGroupName: default-vpc-049cedfe91fc7cc5b
+      DBClusterIdentifier: !Sub "debateitdb-${EnvironmentParameter}"
+      EnableHttpEndpoint: true
+      Engine: aurora-postgresql
+      EngineMode: serverless
+      EngineVersion: 11.13
+      MasterUsername: !Sub '{{resolve:secretsmanager:${DebateItDBSecret}::username}}'
+      MasterUserPassword: !Sub '{{resolve:secretsmanager:${DebateItDBSecret}::password}}'
+      ScalingConfiguration:
+        AutoPause: false
+        MaxCapacity: 2
+        MinCapacity: 2
+      SourceRegion: us-east-1
+      VpcSecurityGroupIds: [!Ref DBSecurityGroup]
+  DebateItDBSecretAttachment:
+    Type: AWS::SecretsManager::SecretTargetAttachment
+    Properties: 
+      SecretId: !Ref DebateItDBSecret
+      TargetId: !Ref DebateItDB
+      TargetType: AWS::RDS::DBCluster
+
