@@ -28,7 +28,7 @@ Resources:
           ToPort: 5432
           IpProtocol: tcp
           CidrIp: 0.0.0.0/0
-      VpcId: vpc-07badc8cca95093b3
+      VpcId: vpc-0104ff4f06ad0c7af
   DebateItDBSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
