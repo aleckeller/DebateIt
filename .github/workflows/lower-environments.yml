@@ -28,6 +28,7 @@ jobs:
             - run: sam build --use-container
             - run: sam deploy packaged.yaml --parameter-overrides "EnvironmentParameter=${{ steps.extract_branch.outputs.branch }}" --stack-name debateit-api-${{ steps.extract_branch.outputs.branch }} --no-confirm-changeset --no-fail-on-empty-changeset
     migrate:
+      needs: deploy
       runs-on: ubuntu-latest
       defaults:
         run:

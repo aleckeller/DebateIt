@@ -69,7 +69,7 @@ def run_migrations_online() -> None:
             context.run_migrations()
 
 def _get_connection_url() -> str:
-    secret = get_secret("debateitdb-secret-develop")
+    secret = get_secret("debateitdb-secret-develop", transform="json")
     username = secret["username"]
     password = secret["password"]
     db_name = secret["dbname"]
