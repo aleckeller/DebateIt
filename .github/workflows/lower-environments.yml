@@ -26,7 +26,7 @@ jobs:
                 aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
                 aws-region: us-east-1
             - run: sam build --use-container
-            - run: sam deploy packaged.yaml --parameter-overrides "EnvironmentParameter=${{ steps.extract_branch.outputs.branch }}" --stack-name debateit-api-${{ steps.extract_branch.outputs.branch }} --no-confirm-changeset --no-fail-on-empty-changeset --resolve-s3 --capabilities CAPABILITY_IAM
+            - run: sam deploy packaged.yaml --parameter-overrides "EnvironmentParameter=${{ steps.extract_branch.outputs.branch }}" "DatabaseSecretName=debateitdb-secret-${{ steps.extract_branch.outputs.branch }}" --stack-name debateit-api-${{ steps.extract_branch.outputs.branch }} --no-confirm-changeset --no-fail-on-empty-changeset --resolve-s3 --capabilities CAPABILITY_IAM
     migrate:
       needs: deploy
       runs-on: ubuntu-latest
@@ -45,5 +45,7 @@ jobs:
             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: us-east-1
-        - run: echo "ENVIRONMENT=$(echo ${{ steps.extract_branch.outputs.branch }})" >> $GITHUB_ENV
+        - run: echo "DATABASE_SECRET_NAME=$(echo debateitdb-secret-${{ steps.extract_branch.outputs.branch }})" >> $GITHUB_ENV
         - run: alembic upgrade heads
+        - run: python3 -m db.data.insert
+        

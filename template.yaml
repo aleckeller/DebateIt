@@ -8,6 +8,8 @@ Description: >
 Parameters:
   EnvironmentParameter:
     Type: String
+  DatabaseSecretName:
+    Type: String
   DatabaseNameParameter:
     Type: String
     Default: debateitdb
@@ -37,7 +39,7 @@ Resources:
   DebateItDBSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: !Sub "debateitdb-secret-${EnvironmentParameter}"
+      Name: !Ref DatabaseSecretName
       Description: RDS database auto-generated user password
       GenerateSecretString:
         SecretStringTemplate: !Sub '{"username": "debateitdbowner"}'

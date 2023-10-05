@@ -2,7 +2,6 @@ from logging.config import fileConfig
 from os import environ
 
 from sqlalchemy import create_engine
-from sqlalchemy import pool
 
 from alembic import context
 from aws_lambda_powertools.utilities.parameters import get_secret
@@ -70,8 +69,7 @@ def run_migrations_online() -> None:
 
 
 def _get_connection_url() -> str:
-    environment = environ["ENVIRONMENT"]
-    secret = get_secret(f"debateitdb-secret-{environment}", transform="json")
+    secret = get_secret(environ["DATABASE_SECRET_NAME"], transform="json")
     username = secret["username"]
     password = secret["password"]
     db_name = secret["dbname"]

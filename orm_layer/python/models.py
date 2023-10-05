@@ -26,7 +26,7 @@ class Debate(Base):
     __tablename__ = "debate"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(30))
+    title: Mapped[str] = mapped_column(String)
     summary: Mapped[str] = mapped_column(String)
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -83,7 +83,7 @@ class User(Base):
     __tablename__ = "user"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(String(30))
+    username: Mapped[str] = mapped_column(String(30), unique=True)
     profile_picture_url: Mapped[str] = mapped_column(String, nullable=True)
 
     responses: Mapped[List["Response"]] = relationship(back_populates="user")
