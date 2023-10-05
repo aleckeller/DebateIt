@@ -1,5 +1,6 @@
 from utils import create_db_engine, create_db_session
 
+
 # Get SQLAlchemy Session
 def get_db_session(secret):
     username = secret["username"]
