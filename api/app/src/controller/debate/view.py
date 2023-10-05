@@ -14,4 +14,5 @@ def get_debates():
     """
     Returns list of debates
     """
+    router.context["logger"].info(router.context["db_session"])
     return []

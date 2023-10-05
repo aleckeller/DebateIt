@@ -11,6 +11,11 @@ Parameters:
   DatabaseNameParameter:
     Type: String
     Default: debateitdb
+  LogLevel:
+    Type: String
+    Description: Log level for the api
+    Default: INFO
+
 
 Resources:
   DBSecurityGroup:
@@ -65,16 +70,6 @@ Resources:
     Properties:
       StageName: Prod
       TracingEnabled: true
-  ApiFunctionSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties: 
-      GroupDescription: Security Group for API Function
-      GroupName: !Sub "api-function-sg-${EnvironmentParameter}"
-      SecurityGroupEgress: 
-        - Description: Allow all outbound traffic
-          IpProtocol: "-1"
-          CidrIp: 0.0.0.0/0
-      VpcId: vpc-0104ff4f06ad0c7af
   ORMLayer:
       Type: AWS::Serverless::LayerVersion
       Properties:
@@ -93,7 +88,14 @@ Resources:
       Environment:
         Variables:
           LOG_LEVEL: !Sub "${LogLevel}"
+          DB_SECRET_NAME: !Ref DebateItDBSecret
       Events:
+        GetDebateList:
+          Type: Api
+          Properties:
+            Path: /debate/list
+            Method: get
+            RestApiId: !Ref APIGateway
         HelloEvent:
           Type: Api
           Properties:
@@ -107,6 +109,4 @@ Resources:
       Runtime: python3.9
       Timeout: 30
       Tracing: Active
-      VpcConfig:
-        SecurityGroupIds: [!Ref ApiFunctionSecurityGroup]
 
