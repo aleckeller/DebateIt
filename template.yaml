@@ -60,4 +60,53 @@ Resources:
       SecretId: !Ref DebateItDBSecret
       TargetId: !Ref DebateItDB
       TargetType: AWS::RDS::DBInstance
+  APIGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      TracingEnabled: true
+  ApiFunctionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: Security Group for API Function
+      GroupName: !Sub "api-function-sg-${EnvironmentParameter}"
+      SecurityGroupEgress: 
+        - Description: Allow all outbound traffic
+          IpProtocol: "-1"
+          CidrIp: 0.0.0.0/0
+      VpcId: vpc-0104ff4f06ad0c7af
+  ORMLayer:
+      Type: AWS::Serverless::LayerVersion
+      Properties:
+          LayerName: orm-layer
+          Description: SQLAlchemy models and utilities
+          ContentUri: ./orm_layer/
+          CompatibleRuntimes:
+            - python3.9
+          LicenseInfo: 'MIT'
+          RetentionPolicy: Retain
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures: [x86_64]
+      CodeUri: api/app
+      Environment:
+        Variables:
+          LOG_LEVEL: !Sub "${LogLevel}"
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /health
+            Method: get
+            RestApiId: !Ref APIGateway
+      Handler: src.handler.lambda_handler
+      Layers:
+        - !Ref ORMLayer
+      Policies: [SecretsManagerReadWrite]
+      Runtime: python3.9
+      Timeout: 30
+      Tracing: Active
+      VpcConfig:
+        SecurityGroupIds: [!Ref ApiFunctionSecurityGroup]
 

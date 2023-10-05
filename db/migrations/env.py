@@ -1,4 +1,5 @@
 from logging.config import fileConfig
+from os import environ
 
 from sqlalchemy import create_engine
 from sqlalchemy import pool
@@ -17,7 +18,7 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from models import Base
+from orm_layer.python.models import Base
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -69,7 +70,8 @@ def run_migrations_online() -> None:
             context.run_migrations()
 
 def _get_connection_url() -> str:
-    secret = get_secret("debateitdb-secret-develop", transform="json")
+    environment = environ["ENVIRONMENT"]
+    secret = get_secret(f"debateitdb-secret-{environment}", transform="json")
     username = secret["username"]
     password = secret["password"]
     db_name = secret["dbname"]

@@ -35,6 +35,10 @@ jobs:
           working-directory: ./db
       steps:
         - uses: actions/checkout@v3
+        - name: Extract branch name
+          shell: bash
+          run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+          id: extract_branch 
         - uses: actions/setup-python@v4
           with:
             python-version: '3.11'
@@ -44,4 +48,5 @@ jobs:
             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: us-east-1
+        - run: echo "ENVIRONMENT=$(echo ${{ steps.extract_branch.outputs.branch }})" >> $GITHUB_ENV
         - run: alembic upgrade heads
