@@ -7,7 +7,7 @@ from datetime import datetime
 
 from pydantic import StringConstraints
 
-from ..model import PsqlModel
+from ..model import PsqlModel, BaseModel
 
 
 class CreateDebate(PsqlModel):
@@ -32,3 +32,13 @@ class CreateDebate(PsqlModel):
     created_by_id: int
     end_at: datetime
     category_ids: list[int]
+
+
+class UploadFile(BaseModel):
+    """
+    Parameters for uploading a file
+    """
+
+    debate_id: int
+    file_location: str
+    file_bytes: bytes

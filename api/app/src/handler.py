@@ -8,9 +8,11 @@ from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.parameters import get_secret
+from boto3 import client
 
 # pylint: disable=import-error
 from src.controller.debate.view import router as debate_router
+from src.service.files import FileService
 
 from src.service.database import get_db_session
 
@@ -20,6 +22,7 @@ app.include_router(debate_router, prefix="/debate")
 
 LOGGER = Logger(level=environ["LOG_LEVEL"])
 DB_SESSION = get_db_session(get_secret(environ["DB_SECRET_NAME"], transform="json"))
+FILE_SERVICE = FileService(client("s3"), environ["S3_BUCKET"])
 
 
 @LOGGER.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
@@ -30,7 +33,7 @@ def lambda_handler(event: dict, context: LambdaContext) -> dict:
 
     LOGGER.debug(event)
     LOGGER.debug(context)
-    app.append_context(logger=LOGGER, db_session=DB_SESSION)
+    app.append_context(logger=LOGGER, db_session=DB_SESSION, file_service=FILE_SERVICE)
     try:
         result = app.resolve(event, context)
         return result

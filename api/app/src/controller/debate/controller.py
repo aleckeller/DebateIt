@@ -1,8 +1,9 @@
-from sqlalchemy import select, func, insert
+from sqlalchemy import select, func, insert, update
 from sqlalchemy.orm import Session, aliased
 
+from ...service.files import FileService
 from models import Debate, DebateCategory, Response, User, debate_debate_category_table
-from .model import CreateDebate
+from .model import CreateDebate, UploadFile
 
 
 def get_debates(session: Session):
@@ -68,3 +69,21 @@ def _create_debate_debate_category_relationship(
             for category_id in debate_categories
         ],
     )
+
+
+def update_file_location(upload_file: UploadFile, session: Session):
+    """
+    Updates db to file location
+    """
+    condition = Debate.id == upload_file.debate_id
+    update_stmt = (
+        update(Debate).where(condition).values(picture_url=upload_file.file_location)
+    )
+    session.execute(update_stmt)
+
+
+def upload_file(file_service: FileService, upload_file: UploadFile) -> dict:
+    """
+    Uploads file using service
+    """
+    return file_service.upload(upload_file.file_bytes, upload_file.file_location)
