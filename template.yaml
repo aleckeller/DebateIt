@@ -72,6 +72,8 @@ Resources:
     Properties:
       StageName: Prod
       TracingEnabled: true
+      BinaryMediaTypes:
+        - "*~1*"
   ORMLayer:
       Type: AWS::Serverless::LayerVersion
       Properties:
@@ -95,6 +97,12 @@ Resources:
               - GET
             AllowedOrigins:
               - '*'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: False
+        BlockPublicPolicy: False
+        IgnorePublicAcls: False
+        RestrictPublicBuckets: False
+
   ApiFunction:
     Type: AWS::Serverless::Function
     Properties:
