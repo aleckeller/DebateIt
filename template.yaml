@@ -142,6 +142,12 @@ Resources:
             Path: /debate/{debate_id}/file
             Method: put
             RestApiId: !Ref APIGateway
+        CreateDebateResponse:
+          Type: Api
+          Properties:
+            Path: /debate/response
+            Method: post
+            RestApiId: !Ref APIGateway
         HelloEvent:
           Type: Api
           Properties:

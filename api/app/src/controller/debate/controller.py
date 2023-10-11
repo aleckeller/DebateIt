@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, aliased
 
 from ...service.files import FileService
 from models import Debate, DebateCategory, Response, User, debate_debate_category_table
-from .model import CreateDebate, UploadFile
+from .model import CreateDebate, UploadFile, CreateResponse
 
 
 def get_debates(session: Session):
@@ -20,7 +20,7 @@ def get_debates(session: Session):
             func.array_agg(func.distinct(DebateCategory.name)).label("category_names"),
             Debate.summary,
             Debate.picture_url,
-            func.count(Response.id).label("responses"),
+            func.count(func.distinct(Response.id)).label("responses"),
             ucb_alias.username.label("created_by"),
             uw_alias.username.label("winner"),
         )
@@ -87,3 +87,17 @@ def upload_file(file_service: FileService, upload_file: UploadFile) -> dict:
     Uploads file using service
     """
     return file_service.upload(upload_file.file_bytes, upload_file.file_location)
+
+
+def create_response(session: Session, response: CreateResponse) -> int:
+    """
+    Creates a response
+    """
+    return (
+        session.execute(
+            insert(Response).returning(Response),
+            response.bind_vars(),
+        )
+        .first()[0]
+        .id
+    )

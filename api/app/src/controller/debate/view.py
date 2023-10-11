@@ -9,8 +9,14 @@ from aws_lambda_powertools.event_handler.exceptions import BadRequestError
 
 # pylint: disable=import-error
 
-from .controller import get_debates, create_debate, update_file_location, upload_file
-from .model import CreateDebate, UploadFile
+from .controller import (
+    get_debates,
+    create_debate,
+    update_file_location,
+    upload_file,
+    create_response,
+)
+from .model import CreateDebate, UploadFile, CreateResponse
 
 # pylint: enable=import-error
 
@@ -75,3 +81,28 @@ def put_file_route(debate_id: int):
 
     router.context["db_session"].commit()
     return {"picture_url": upload_file_model.file_location}
+
+
+@router.post("/response")
+def create_response_route():
+    """
+    Creates response
+    """
+    request_body = (
+        router.current_event.json_body if router.current_event.get("body") else {}
+    )
+
+    id = create_response(
+        router.context["db_session"],
+        CreateResponse(
+            body=request_body.get("body"),
+            debate_id=request_body.get("debate_id"),
+            user_id=request_body.get("user_id"),
+            agree=0,
+            disagree=0,
+        ),
+    )
+
+    router.context["db_session"].commit()
+
+    return {"id": id}
