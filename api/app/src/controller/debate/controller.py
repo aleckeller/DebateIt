@@ -17,7 +17,7 @@ def get_debates(session: Session):
         select(
             Debate.id,
             Debate.title,
-            func.array_agg(DebateCategory.name).label("category_names"),
+            func.array_agg(func.distinct(DebateCategory.name)).label("category_names"),
             Debate.summary,
             Debate.picture_url,
             func.count(Response.id).label("responses"),
