@@ -5,7 +5,7 @@ from os import environ
 from datetime import datetime, timedelta
 
 from aws_lambda_powertools.utilities.parameters import get_secret
-from sqlalchemy import insert, delete
+from sqlalchemy import insert, text, delete
 
 from orm_layer.python.utils import create_db_engine, create_db_session
 from orm_layer.python.models import (
@@ -15,6 +15,7 @@ from orm_layer.python.models import (
     debate_debate_category_table,
     Response,
 )
+from orm_layer.python.table_data import DEBATE_CATEGORIES
 
 
 # Get SQLAlchemy Session
@@ -40,11 +41,11 @@ def _insert_users():
     DB_SESSION.execute(
         insert(User),
         [
-            {"id": 1, "username": "testuser1"},
-            {"id": 2, "username": "testuser2"},
-            {"id": 3, "username": "testuser3"},
-            {"id": 4, "username": "testuser4"},
-            {"id": 5, "username": "testuser5"},
+            {"username": "testuser1"},
+            {"username": "testuser2"},
+            {"username": "testuser3"},
+            {"username": "testuser4"},
+            {"username": "testuser5"},
         ],
     )
 
@@ -54,21 +55,18 @@ def _insert_debates():
         insert(Debate),
         [
             {
-                "id": 1,
                 "title": "Should governments implement a universal basic income to provide financial support to all citizens, regardless of their employment status?",
                 "summary": "This would list out any additional details a user wanted to provide for the debate",
                 "created_by_id": 1,
                 "end_at": datetime.now() + timedelta(days=3),
             },
             {
-                "id": 2,
                 "title": "Is the current global approach to combating climate change effective, or should there be a shift in focus or strategy?",
                 "summary": "This would list out any additional details a user wanted to provide for the debate",
                 "created_by_id": 2,
                 "end_at": datetime.now() + timedelta(days=2),
             },
             {
-                "id": 3,
                 "title": "How should governments balance the need for online privacy rights with the necessity of national security surveillance programs?",
                 "summary": "This would list out any additional details a user wanted to provide for the debate",
                 "created_by_id": 1,
@@ -76,7 +74,6 @@ def _insert_debates():
                 "winner_id": 2,
             },
             {
-                "id": 4,
                 "title": "Should governments legalize and regulate the recreational use of currently illegal drugs, such as marijuana or psychedelics?",
                 "summary": "This would list out any additional details a user wanted to provide for the debate",
                 "created_by_id": 3,
@@ -88,14 +85,12 @@ def _insert_debates():
 
 
 def _insert_debate_categories():
+    categories = [
+        {"id": index + 1, "name": name} for index, name in enumerate(DEBATE_CATEGORIES)
+    ]
     DB_SESSION.execute(
         insert(DebateCategory),
-        [
-            {"id": 1, "name": "Finance"},
-            {"id": 2, "name": "Environment"},
-            {"id": 3, "name": "Privacy"},
-            {"id": 4, "name": "Drug Reform"},
-        ],
+        categories,
     )
 
 
@@ -116,7 +111,6 @@ def _insert_responses():
         insert(Response),
         [
             {
-                "id": 1,
                 "body": "UBI can provide financial security to individuals and families living in poverty, helping them meet basic needs such as food, shelter, and healthcare.",
                 "agree": 25,
                 "disagree": 4,
@@ -124,7 +118,6 @@ def _insert_responses():
                 "user_id": 1,
             },
             {
-                "id": 2,
                 "body": "UBI cannot provide financial security to individuals and families living in poverty, helping them meet basic needs such as food, shelter, and healthcare.",
                 "agree": 3,
                 "disagree": 25,
@@ -132,7 +125,6 @@ def _insert_responses():
                 "user_id": 3,
             },
             {
-                "id": 3,
                 "body": "There has been a rapid expansion of renewable energy sources like solar and wind power, which contribute to reducing carbon emissions.",
                 "agree": 2,
                 "disagree": 2,
@@ -140,7 +132,6 @@ def _insert_responses():
                 "user_id": 2,
             },
             {
-                "id": 4,
                 "body": "Ensure that these laws are regularly reviewed and updated to keep pace with technological advancements and changing security needs.",
                 "agree": 13,
                 "disagree": 0,
@@ -151,11 +142,15 @@ def _insert_responses():
     )
 
 
-DB_SESSION.execute(delete(Response))
-DB_SESSION.execute(delete(debate_debate_category_table))
-DB_SESSION.execute(delete(Debate))
-DB_SESSION.execute(delete(DebateCategory))
-DB_SESSION.execute(delete(User))
+table_names = [
+    Debate.__table__,
+    DebateCategory.__table__,
+    f"public.{User.__table__}",
+    Response.__table__,
+]
+for name in table_names:
+    DB_SESSION.execute(text(f"TRUNCATE TABLE {name} CASCADE;"))
+    DB_SESSION.execute(text(f"ALTER SEQUENCE {name}_id_seq RESTART WITH 1"))
 
 _insert_users()
 _insert_debates()

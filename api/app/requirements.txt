@@ -2,3 +2,4 @@ aws-lambda-powertools==2.25.1
 boto3==1.28.59
 SQLAlchemy==2.0.21
 psycopg2-binary==2.9.5
+pydantic==2.4.2

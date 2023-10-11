@@ -9,9 +9,7 @@ from sqlalchemy.sql import func
 
 
 class Base(DeclarativeBase):
-    def to_dict(self):
-        del self.__dict__["_sa_instance_state"]
-        return self.__dict__
+    pass
 
 
 debate_debate_category_table = Table(
@@ -25,7 +23,7 @@ debate_debate_category_table = Table(
 class Debate(Base):
     __tablename__ = "debate"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String)
     summary: Mapped[str] = mapped_column(String)
     created_at: Mapped[DateTime] = mapped_column(
@@ -50,23 +48,11 @@ class Debate(Base):
         winner_id: {self.winner_id})>
         """
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "summary": self.summary,
-            "created_at": str(self.created_at),
-            "created_by_id": self.created_by_id,
-            "end_at": str(self.end_at),
-            "picture_url": self.picture_url,
-            "winner_id": self.winner_id,
-        }
-
 
 class DebateCategory(Base):
     __tablename__ = "debate_category"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(30))
 
     debates: Mapped[List["Debate"]] = relationship(
@@ -82,7 +68,7 @@ class DebateCategory(Base):
 class User(Base):
     __tablename__ = "user"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(String(30), unique=True)
     profile_picture_url: Mapped[str] = mapped_column(String, nullable=True)
 
@@ -97,7 +83,7 @@ class User(Base):
 class Response(Base):
     __tablename__ = "response"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     body: Mapped[str] = mapped_column(String)
     agree: Mapped[int] = mapped_column(Integer)
     disagree: Mapped[int] = mapped_column(Integer)

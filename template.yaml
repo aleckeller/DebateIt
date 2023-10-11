@@ -98,6 +98,12 @@ Resources:
             Path: /debate/list
             Method: get
             RestApiId: !Ref APIGateway
+        CreateDebate:
+          Type: Api
+          Properties:
+            Path: /debate
+            Method: post
+            RestApiId: !Ref APIGateway
         HelloEvent:
           Type: Api
           Properties:
