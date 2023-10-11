@@ -82,6 +82,19 @@ Resources:
             - python3.9
           LicenseInfo: 'MIT'
           RetentionPolicy: Retain
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "debateit-bucket-${EnvironmentParameter}"
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - PUT
+              - GET
+            AllowedOrigins:
+              - '*'
   ApiFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -91,6 +104,7 @@ Resources:
         Variables:
           LOG_LEVEL: !Sub "${LogLevel}"
           DB_SECRET_NAME: !Ref DebateItDBSecret
+          S3_BUCKET: !Ref S3Bucket
       Events:
         GetDebateList:
           Type: Api
@@ -103,6 +117,12 @@ Resources:
           Properties:
             Path: /debate
             Method: post
+            RestApiId: !Ref APIGateway
+        UploadDebatePicture:
+          Type: Api
+          Properties:
+            Path: /debate/{debate_id}/file
+            Method: put
             RestApiId: !Ref APIGateway
         HelloEvent:
           Type: Api
@@ -117,4 +137,3 @@ Resources:
       Runtime: python3.9
       Timeout: 30
       Tracing: Active
-
