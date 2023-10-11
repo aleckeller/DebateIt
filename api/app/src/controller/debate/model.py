@@ -31,3 +31,4 @@ class CreateDebate(PsqlModel):
     ]
     created_by_id: int
     end_at: datetime
+    category_ids: list[int]

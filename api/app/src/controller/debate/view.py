@@ -7,7 +7,10 @@ from aws_lambda_powertools.event_handler.api_gateway import Router
 
 # pylint: disable=import-error
 
-from .controller import get_debates, create_debate
+from .controller import (
+    get_debates,
+    create_debate,
+)
 from .model import CreateDebate
 
 # pylint: enable=import-error
@@ -39,6 +42,7 @@ def create_debate_route():
             summary=request_body.get("summary"),
             created_by_id=request_body.get("created_by_id"),
             end_at=request_body.get("end_at", datetime.now() + timedelta(days=7)),
+            category_ids=request_body.get("category_ids"),
         ),
     )
 

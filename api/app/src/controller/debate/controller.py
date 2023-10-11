@@ -1,7 +1,7 @@
 from sqlalchemy import select, func, insert
 from sqlalchemy.orm import Session, aliased
 
-from models import Debate, DebateCategory, Response, User
+from models import Debate, DebateCategory, Response, User, debate_debate_category_table
 from .model import CreateDebate
 
 
@@ -16,7 +16,7 @@ def get_debates(session: Session):
         select(
             Debate.id,
             Debate.title,
-            DebateCategory.name.label("category_name"),
+            func.array_agg(DebateCategory.name).label("category_names"),
             Debate.summary,
             Debate.picture_url,
             func.count(Response.id).label("responses"),
@@ -30,7 +30,6 @@ def get_debates(session: Session):
         .group_by(
             Debate.id,
             Debate.title,
-            DebateCategory.name,
             Debate.summary,
             Debate.picture_url,
             ucb_alias.username,
@@ -47,11 +46,25 @@ def create_debate(session: Session, debate: CreateDebate) -> int:
     """
     Creates a debate
     """
-    return (
+    debate_id = (
         session.execute(
             insert(Debate).returning(Debate),
             debate.bind_vars(),
         )
         .first()[0]
         .id
+    )
+    _create_debate_debate_category_relationship(session, debate_id, debate.category_ids)
+    return debate_id
+
+
+def _create_debate_debate_category_relationship(
+    session: Session, debate_id: id, debate_categories: list[int]
+):
+    session.execute(
+        insert(debate_debate_category_table),
+        [
+            {"debate_id": debate_id, "debate_category_id": category_id}
+            for category_id in debate_categories
+        ],
     )
