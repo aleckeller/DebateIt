@@ -151,7 +151,10 @@ Resources:
       Handler: src.handler.lambda_handler
       Layers:
         - !Ref ORMLayer
-      Policies: [SecretsManagerReadWrite]
+      Policies: 
+        - SecretsManagerReadWrite
+        - S3CrudPolicy:
+            BucketName: !Ref S3Bucket
       Runtime: python3.9
       Timeout: 30
       Tracing: Active
