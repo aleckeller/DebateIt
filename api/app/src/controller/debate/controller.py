@@ -120,7 +120,7 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
             Debate.picture_url,
             case(
                 (
-                    Response.id.isnot(None),
+                    func.count(Response.id) > 0,
                     func.jsonb_agg(
                         func.jsonb_build_object(
                             "id",
@@ -133,7 +133,7 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
                             Response.disagree,
                             "created_by",
                             urcb_alias.username.label("created_by"),
-                        ).distinct()
+                        )
                     ),
                 ),
                 else_="[]",
@@ -151,7 +151,6 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
             Debate.title,
             Debate.summary,
             Debate.picture_url,
-            Response.id,
             ucb_alias.username,
             uw_alias.username,
         )
