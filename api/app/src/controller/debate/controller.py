@@ -20,6 +20,7 @@ def get_debates(session: Session) -> list[dict]:
             func.array_agg(func.distinct(DebateCategory.name)).label("category_names"),
             Debate.summary,
             Debate.picture_url,
+            func.to_char(Debate.end_at, "MM-DD-YYYY hh:MI:SS AM").label("end_at"),
             func.count(func.distinct(Response.id)).label("responses"),
             ucb_alias.username.label("created_by"),
             uw_alias.username.label("winner"),
@@ -118,6 +119,7 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
             func.array_agg(func.distinct(DebateCategory.name)).label("category_names"),
             Debate.summary,
             Debate.picture_url,
+            func.to_char(Debate.end_at, "MM-DD-YYYY hh:MI:SS AM").label("end_at"),
             case(
                 (
                     func.count(Response.id) > 0,
