@@ -133,7 +133,7 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
                             Response.disagree,
                             "created_by",
                             urcb_alias.username.label("created_by"),
-                        )
+                        ).distinct()
                     ),
                 ),
                 else_="[]",
