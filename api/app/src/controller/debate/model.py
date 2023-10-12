@@ -57,6 +57,14 @@ class CreateResponse(PsqlModel):
         ),
     ]
     debate_id: int
-    user_id: int
+    created_by_id: int
     agree: int
     disagree: int
+
+
+class GetDebate(PsqlModel):
+    """
+    Parameters for getting a debate
+    """
+
+    debate_id: int

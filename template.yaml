@@ -148,6 +148,12 @@ Resources:
             Path: /debate/response
             Method: post
             RestApiId: !Ref APIGateway
+        GetDebate:
+          Type: Api
+          Properties:
+            Path: /debate/{debate_id}/single
+            Method: get
+            RestApiId: !Ref APIGateway
         HelloEvent:
           Type: Api
           Properties:

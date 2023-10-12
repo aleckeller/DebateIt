@@ -1,12 +1,12 @@
-from sqlalchemy import select, func, insert, update
+from sqlalchemy import select, func, insert, update, case
 from sqlalchemy.orm import Session, aliased
 
 from ...service.files import FileService
 from models import Debate, DebateCategory, Response, User, debate_debate_category_table
-from .model import CreateDebate, UploadFile, CreateResponse
+from .model import CreateDebate, UploadFile, CreateResponse, GetDebate
 
 
-def get_debates(session: Session):
+def get_debates(session: Session) -> list[dict]:
     """
     Returns list of debates
     """
@@ -101,3 +101,63 @@ def create_response(session: Session, response: CreateResponse) -> int:
         .first()[0]
         .id
     )
+
+
+def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
+    """
+    Get a debate
+    """
+    ucb_alias = aliased(User)
+    uw_alias = aliased(User)
+    urcb_alias = aliased(User)
+
+    stmt = (
+        select(
+            Debate.id,
+            Debate.title,
+            func.array_agg(func.distinct(DebateCategory.name)).label("category_names"),
+            Debate.summary,
+            Debate.picture_url,
+            case(
+                (
+                    Response.id.isnot(None),
+                    func.jsonb_agg(
+                        func.jsonb_build_object(
+                            "id",
+                            Response.id,
+                            "body",
+                            Response.body,
+                            "agree",
+                            Response.agree,
+                            "disagree",
+                            Response.disagree,
+                            "created_by",
+                            urcb_alias.username.label("created_by"),
+                        ).distinct()
+                    ),
+                ),
+                else_="[]",
+            ).label("responses"),
+            ucb_alias.username.label("created_by"),
+            uw_alias.username.label("winner"),
+        )
+        .outerjoin(Response, Debate.id == Response.debate_id)
+        .outerjoin(DebateCategory, Debate.debate_categories)
+        .outerjoin(ucb_alias, Debate.created_by)
+        .outerjoin(uw_alias, Debate.winner)
+        .outerjoin(urcb_alias, Response.user)
+        .group_by(
+            Debate.id,
+            Debate.title,
+            Debate.summary,
+            Debate.picture_url,
+            Response.id,
+            ucb_alias.username,
+            uw_alias.username,
+        )
+        .where(Debate.id == get_debate_model.debate_id)
+    )
+
+    result = session.execute(stmt).first()
+
+    return result._asdict() if result else {}

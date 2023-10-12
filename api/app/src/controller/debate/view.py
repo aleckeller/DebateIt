@@ -15,8 +15,9 @@ from .controller import (
     update_file_location,
     upload_file,
     create_response,
+    get_debate,
 )
-from .model import CreateDebate, UploadFile, CreateResponse
+from .model import CreateDebate, UploadFile, CreateResponse, GetDebate
 
 # pylint: enable=import-error
 
@@ -97,7 +98,7 @@ def create_response_route():
         CreateResponse(
             body=request_body.get("body"),
             debate_id=request_body.get("debate_id"),
-            user_id=request_body.get("user_id"),
+            created_by_id=request_body.get("created_by_id"),
             agree=0,
             disagree=0,
         ),
@@ -106,3 +107,11 @@ def create_response_route():
     router.context["db_session"].commit()
 
     return {"id": id}
+
+
+@router.get("/<debate_id>/single")
+def get_debate_route(debate_id: int):
+    """
+    Returns single debate
+    """
+    return get_debate(router.context["db_session"], GetDebate(debate_id=debate_id))

@@ -88,7 +88,7 @@ class Response(Base):
     agree: Mapped[int] = mapped_column(Integer)
     disagree: Mapped[int] = mapped_column(Integer)
     debate_id: Mapped[int] = mapped_column(ForeignKey("debate.id"))
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    created_by_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
 
     debate: Mapped["Debate"] = relationship(back_populates="responses")
     user: Mapped["User"] = relationship(back_populates="responses")
@@ -96,5 +96,5 @@ class Response(Base):
     def __repr__(self):
         return f"""
         <Response(id: {self.id}, body: {self.body}, agree: {self.agree}, disagree: {self.disagree},
-        debate_id: {self.debate_id}, user_id: {self.user_id})>
+        debate_id: {self.debate_id}, created_by_id: {self.created_by_id})>
         """
