@@ -1,1 +1,17 @@
-DEBATE_CATEGORIES = ["Finance", "Environment", "Privacy", "Drug Reform", "Sports"]
+DEBATE_CATEGORIES = [
+    "Economic Policy",
+    "Environmental Issues",
+    "Privacy and Security",
+    "Drug Policy",
+    "Criminal Justice",
+    "Education",
+    "Social Media",
+    "Sports and Activism",
+    "Censorship",
+    "Food and Agriculture",
+    "Education",
+    "Healthcare",
+    "Space Exploration",
+    "Voting and Elections",
+    "Alcohol Policy",
+]

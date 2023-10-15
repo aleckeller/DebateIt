@@ -1,4 +1,4 @@
-from sqlalchemy import select, func, insert, update, case
+from sqlalchemy import select, func, insert, update, case, literal, String, Case
 from sqlalchemy.orm import Session, aliased
 
 from ...service.files import FileService
@@ -20,15 +20,15 @@ def get_debates(session: Session) -> list[dict]:
             func.array_agg(func.distinct(DebateCategory.name)).label("category_names"),
             Debate.summary,
             Debate.picture_url,
-            func.to_char(Debate.end_at, "MM-DD-YYYY hh:MI:SS AM").label("end_at"),
+            _get_end_at(),
             func.count(func.distinct(Response.id)).label("responses"),
             ucb_alias.username.label("created_by"),
-            uw_alias.username.label("winner"),
+            uw_alias.username.label("leader"),
         )
         .outerjoin(Response, Debate.id == Response.debate_id)
         .outerjoin(DebateCategory, Debate.debate_categories)
         .outerjoin(ucb_alias, Debate.created_by)
-        .outerjoin(uw_alias, Debate.winner)
+        .outerjoin(uw_alias, Debate.leader)
         .group_by(
             Debate.id,
             Debate.title,
@@ -119,7 +119,7 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
             func.array_agg(func.distinct(DebateCategory.name)).label("category_names"),
             Debate.summary,
             Debate.picture_url,
-            func.to_char(Debate.end_at, "MM-DD-YYYY hh:MI:SS AM").label("end_at"),
+            _get_end_at(),
             case(
                 (
                     func.count(Response.id) > 0,
@@ -141,12 +141,12 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
                 else_="[]",
             ).label("responses"),
             ucb_alias.username.label("created_by"),
-            uw_alias.username.label("winner"),
+            uw_alias.username.label("leader"),
         )
         .outerjoin(Response, Debate.id == Response.debate_id)
         .outerjoin(DebateCategory, Debate.debate_categories)
         .outerjoin(ucb_alias, Debate.created_by)
-        .outerjoin(uw_alias, Debate.winner)
+        .outerjoin(uw_alias, Debate.leader)
         .outerjoin(urcb_alias, Response.user)
         .group_by(
             Debate.id,
@@ -162,3 +162,34 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
     result = session.execute(stmt).first()
 
     return result._asdict() if result else {}
+
+
+def _get_end_at() -> Case:
+    current_date = func.now()
+    return case(
+        (
+            current_date > Debate.end_at,
+            literal("Finished"),
+        ),
+        (
+            func.extract("day", Debate.end_at - current_date) > 0,
+            (
+                func.extract("day", Debate.end_at - current_date).cast(String)
+                + "d-"
+                + func.extract("hour", Debate.end_at - current_date).cast(String)
+                + "h-"
+                + func.extract("minute", Debate.end_at - current_date).cast(String)
+                + "m"
+            ),
+        ),
+        (
+            func.extract("hour", Debate.end_at - current_date) > 0,
+            (
+                func.extract("hour", Debate.end_at - current_date).cast(String)
+                + "h-"
+                + func.extract("minute", Debate.end_at - current_date).cast(String)
+                + "m"
+            ),
+        ),
+        else_=(func.extract("minute", Debate.end_at - current_date).cast(String) + "m"),
+    ).label("end_at")

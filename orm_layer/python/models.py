@@ -32,10 +32,10 @@ class Debate(Base):
     created_by_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     end_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True))
     picture_url: Mapped[str] = mapped_column(String, nullable=True)
-    winner_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=True)
+    leader_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=True)
 
     created_by: Mapped["User"] = relationship(foreign_keys=[created_by_id])
-    winner: Mapped["User"] = relationship(foreign_keys=[winner_id])
+    leader: Mapped["User"] = relationship(foreign_keys=[leader_id])
     debate_categories: Mapped[List["DebateCategory"]] = relationship(
         secondary=debate_debate_category_table, back_populates="debates"
     )
@@ -45,7 +45,7 @@ class Debate(Base):
         return f"""
         <Debate(id: {self.id}, title: {self.title}, summary: {self.summary}, created_at: {self.created_at},
         created_by_id: {self.created_by_id}, end_at: {self.end_at}, picture_url: {self.picture_url}
-        winner_id: {self.winner_id})>
+        leader_id: {self.leader_id})>
         """
 
 
