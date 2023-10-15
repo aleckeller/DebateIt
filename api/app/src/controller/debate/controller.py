@@ -175,9 +175,9 @@ def _get_end_at() -> Case:
             func.extract("day", Debate.end_at - current_date) > 0,
             (
                 func.extract("day", Debate.end_at - current_date).cast(String)
-                + "d-"
+                + "d "
                 + func.extract("hour", Debate.end_at - current_date).cast(String)
-                + "h-"
+                + "h "
                 + func.extract("minute", Debate.end_at - current_date).cast(String)
                 + "m"
             ),
@@ -186,7 +186,7 @@ def _get_end_at() -> Case:
             func.extract("hour", Debate.end_at - current_date) > 0,
             (
                 func.extract("hour", Debate.end_at - current_date).cast(String)
-                + "h-"
+                + "h "
                 + func.extract("minute", Debate.end_at - current_date).cast(String)
                 + "m"
             ),
