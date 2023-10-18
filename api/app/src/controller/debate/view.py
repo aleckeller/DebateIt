@@ -93,7 +93,7 @@ def create_response_route():
         router.current_event.json_body if router.current_event.get("body") else {}
     )
 
-    id = create_response(
+    response = create_response(
         router.context["db_session"],
         CreateResponse(
             body=request_body.get("body"),
@@ -106,7 +106,7 @@ def create_response_route():
 
     router.context["db_session"].commit()
 
-    return {"id": id}
+    return response.to_dict()
 
 
 @router.get("/<debate_id>/single")

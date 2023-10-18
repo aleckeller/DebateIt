@@ -98,3 +98,16 @@ class Response(Base):
         <Response(id: {self.id}, body: {self.body}, agree: {self.agree}, disagree: {self.disagree},
         debate_id: {self.debate_id}, created_by_id: {self.created_by_id})>
         """
+
+    def to_dict(self):
+        """
+        Convert response object to dict
+        """
+        return {
+            "id": self.id,
+            "body": self.body,
+            "agree": self.agree,
+            "disagree": self.disagree,
+            "debate_id": self.debate_id,
+            "created_by_id": self.created_by_id,
+        }

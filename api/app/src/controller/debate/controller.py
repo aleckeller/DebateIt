@@ -94,14 +94,10 @@ def create_response(session: Session, response: CreateResponse) -> int:
     """
     Creates a response
     """
-    return (
-        session.execute(
-            insert(Response).returning(Response),
-            response.bind_vars(),
-        )
-        .first()[0]
-        .id
-    )
+    return session.execute(
+        insert(Response).returning(Response),
+        response.bind_vars(),
+    ).first()[0]
 
 
 def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
