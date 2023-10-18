@@ -14,10 +14,9 @@ from .controller import (
     create_debate,
     update_file_location,
     upload_file,
-    create_response,
     get_debate,
 )
-from .model import CreateDebate, UploadFile, CreateResponse, GetDebate
+from .model import CreateDebate, UploadFile, GetDebate
 
 # pylint: enable=import-error
 
@@ -82,31 +81,6 @@ def put_file_route(debate_id: int):
 
     router.context["db_session"].commit()
     return {"picture_url": upload_file_model.file_location}
-
-
-@router.post("/response")
-def create_response_route():
-    """
-    Creates response
-    """
-    request_body = (
-        router.current_event.json_body if router.current_event.get("body") else {}
-    )
-
-    response = create_response(
-        router.context["db_session"],
-        CreateResponse(
-            body=request_body.get("body"),
-            debate_id=request_body.get("debate_id"),
-            created_by_id=request_body.get("created_by_id"),
-            agree=0,
-            disagree=0,
-        ),
-    )
-
-    router.context["db_session"].commit()
-
-    return response.to_dict()
 
 
 @router.get("/<debate_id>/single")

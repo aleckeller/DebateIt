@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, aliased
 
 from ...service.files import FileService
 from models import Debate, DebateCategory, Response, User, debate_debate_category_table
-from .model import CreateDebate, UploadFile, CreateResponse, GetDebate
+from .model import CreateDebate, UploadFile, GetDebate
 
 
 def get_debates(session: Session) -> list[dict]:
@@ -88,16 +88,6 @@ def upload_file(file_service: FileService, upload_file: UploadFile) -> dict:
     Uploads file using service
     """
     return file_service.upload(upload_file.file_bytes, upload_file.file_location)
-
-
-def create_response(session: Session, response: CreateResponse) -> int:
-    """
-    Creates a response
-    """
-    return session.execute(
-        insert(Response).returning(Response),
-        response.bind_vars(),
-    ).first()[0]
 
 
 def get_debate(session: Session, get_debate_model: GetDebate) -> dict:

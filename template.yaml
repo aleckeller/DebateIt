@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   DebateIt API
@@ -18,14 +18,13 @@ Parameters:
     Description: Log level for the api
     Default: INFO
 
-
 Resources:
   DBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
-    Properties: 
+    Properties:
       GroupDescription: Security Group for the Database
       GroupName: !Sub "debateit-db-sg-${EnvironmentParameter}"
-      SecurityGroupEgress: 
+      SecurityGroupEgress:
         - Description: Allow all outbound traffic
           IpProtocol: "-1"
           CidrIp: 0.0.0.0/0
@@ -56,14 +55,14 @@ Resources:
       DBInstanceClass: "db.t3.micro"
       DBSubnetGroupName: public-subnet-group
       Engine: postgres
-      MasterUsername: !Sub '{{resolve:secretsmanager:${DebateItDBSecret}::username}}'
-      MasterUserPassword: !Sub '{{resolve:secretsmanager:${DebateItDBSecret}::password}}'
+      MasterUsername: !Sub "{{resolve:secretsmanager:${DebateItDBSecret}::username}}"
+      MasterUserPassword: !Sub "{{resolve:secretsmanager:${DebateItDBSecret}::password}}"
       PubliclyAccessible: true
       SourceRegion: us-east-1
       VPCSecurityGroups: [!Ref DBSecurityGroup]
   DebateItDBSecretAttachment:
     Type: AWS::SecretsManager::SecretTargetAttachment
-    Properties: 
+    Properties:
       SecretId: !Ref DebateItDBSecret
       TargetId: !Ref DebateItDB
       TargetType: AWS::RDS::DBInstance
@@ -75,15 +74,15 @@ Resources:
       BinaryMediaTypes:
         - "*~1*"
   ORMLayer:
-      Type: AWS::Serverless::LayerVersion
-      Properties:
-          LayerName: orm-layer
-          Description: SQLAlchemy models and utilities
-          ContentUri: ./orm_layer/
-          CompatibleRuntimes:
-            - python3.9
-          LicenseInfo: 'MIT'
-          RetentionPolicy: Retain
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: orm-layer
+      Description: SQLAlchemy models and utilities
+      ContentUri: ./orm_layer/
+      CompatibleRuntimes:
+        - python3.9
+      LicenseInfo: "MIT"
+      RetentionPolicy: Retain
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -91,12 +90,12 @@ Resources:
       CorsConfiguration:
         CorsRules:
           - AllowedHeaders:
-              - '*'
+              - "*"
             AllowedMethods:
               - PUT
               - GET
             AllowedOrigins:
-              - '*'
+              - "*"
       PublicAccessBlockConfiguration:
         BlockPublicAcls: False
         BlockPublicPolicy: False
@@ -111,7 +110,7 @@ Resources:
           - Effect: Allow
             Principal: "*"
             Action: s3:GetObject
-            Resource: 
+            Resource:
               Fn::Sub: arn:aws:s3:::${S3Bucket}/debates/pictures/*
   ApiFunction:
     Type: AWS::Serverless::Function
@@ -142,10 +141,10 @@ Resources:
             Path: /debate/{debate_id}/file
             Method: put
             RestApiId: !Ref APIGateway
-        CreateDebateResponse:
+        CreateResponse:
           Type: Api
           Properties:
-            Path: /debate/response
+            Path: /response
             Method: post
             RestApiId: !Ref APIGateway
         GetDebate:
@@ -153,6 +152,30 @@ Resources:
           Properties:
             Path: /debate/{debate_id}/single
             Method: get
+            RestApiId: !Ref APIGateway
+        IncrementDebateResponseAgree:
+          Type: Api
+          Properties:
+            Path: /response/{response_id}/agree
+            Method: post
+            RestApiId: !Ref APIGateway
+        DecrementDebateResponseAgree:
+          Type: Api
+          Properties:
+            Path: /response/{response_id}/agree
+            Method: delete
+            RestApiId: !Ref APIGateway
+        IncrementDebateResponseDisagree:
+          Type: Api
+          Properties:
+            Path: /response/{response_id}/disagree
+            Method: post
+            RestApiId: !Ref APIGateway
+        DecrementDebateResponseDisagree:
+          Type: Api
+          Properties:
+            Path: /response/{response_id}/disagree
+            Method: delete
             RestApiId: !Ref APIGateway
         HelloEvent:
           Type: Api
@@ -163,7 +186,7 @@ Resources:
       Handler: src.handler.lambda_handler
       Layers:
         - !Ref ORMLayer
-      Policies: 
+      Policies:
         - SecretsManagerReadWrite
         - S3CrudPolicy:
             BucketName: !Ref S3Bucket

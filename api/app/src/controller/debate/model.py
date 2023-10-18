@@ -44,24 +44,6 @@ class UploadFile(BaseModel):
     file_bytes: bytes
 
 
-class CreateResponse(PsqlModel):
-    """
-    Parameters for creating a response
-    """
-
-    body: Annotated[
-        str,
-        StringConstraints(
-            min_length=1,
-            strip_whitespace=True,
-        ),
-    ]
-    debate_id: int
-    created_by_id: int
-    agree: int
-    disagree: int
-
-
 class GetDebate(PsqlModel):
     """
     Parameters for getting a debate

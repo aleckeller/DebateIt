@@ -12,6 +12,7 @@ from boto3 import client
 
 # pylint: disable=import-error
 from src.controller.debate.view import router as debate_router
+from src.controller.response.view import router as response_router
 from src.service.files import FileService
 
 from src.service.database import get_db_session
@@ -19,6 +20,7 @@ from src.service.database import get_db_session
 # pylint: enable=import-error
 app = APIGatewayRestResolver()
 app.include_router(debate_router, prefix="/debate")
+app.include_router(response_router, prefix="/response")
 
 LOGGER = Logger(level=environ["LOG_LEVEL"])
 DB_SESSION = get_db_session(get_secret(environ["DB_SECRET_NAME"], transform="json"))
