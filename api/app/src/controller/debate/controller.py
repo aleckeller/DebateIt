@@ -21,7 +21,7 @@ def get_debates(session: Session) -> list[dict]:
             Debate.summary,
             Debate.picture_url,
             _get_end_at(),
-            func.count(func.distinct(Response.id)).label("responses"),
+            func.count(func.distinct(Response.id)).label("response_count"),
             ucb_alias.username.label("created_by"),
             uw_alias.username.label("leader"),
         )
