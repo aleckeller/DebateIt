@@ -162,7 +162,7 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
                             func.coalesce(_vote_counts_subquery.c.agree_count, 0),
                             "disagree",
                             func.coalesce(_vote_counts_subquery.c.disagree_count, 0),
-                            "agreeEnabled",
+                            "agree_enabled",
                             case(
                                 (
                                     Response.id.in_(
@@ -172,7 +172,7 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
                                 ),
                                 else_=True,
                             ),
-                            "disagreeEnabled",
+                            "disagree_enabled",
                             case(
                                 (
                                     Response.id.in_(
