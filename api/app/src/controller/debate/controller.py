@@ -109,8 +109,8 @@ def upload_file(file_service: FileService, upload_file: UploadFile) -> dict:
 _vote_counts_subquery = (
     select(
         Vote.response_id,
-        func.sum(case((Vote.vote_type == "AGREE", 1), else_=0)).label("agree_count"),
-        func.sum(case((Vote.vote_type == "DISAGREE", 1), else_=0)).label(
+        func.sum(case((Vote.vote_type == "agree", 1), else_=0)).label("agree_count"),
+        func.sum(case((Vote.vote_type == "disagree", 1), else_=0)).label(
             "disagree_count"
         ),
     )
@@ -166,7 +166,7 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
                             case(
                                 (
                                     Response.id.in_(
-                                        _vote_enabled_subquery(1, "AGREE")
+                                        _vote_enabled_subquery(1, "agree")
                                     ),  # TODO: Update user ID when authentication system is implemented
                                     False,
                                 ),
@@ -176,7 +176,7 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
                             case(
                                 (
                                     Response.id.in_(
-                                        _vote_enabled_subquery(1, "DISAGREE")
+                                        _vote_enabled_subquery(1, "disagree")
                                         # TODO: Update user ID when authentication system is implemented
                                     ),
                                     False,

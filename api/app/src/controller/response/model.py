@@ -2,6 +2,7 @@ from typing import Annotated
 
 from pydantic import StringConstraints
 
+from models import VoteChoice
 from ..model import PsqlModel
 
 
@@ -23,11 +24,28 @@ class CreateResponse(PsqlModel):
     disagree: int
 
 
-# class CreateVote(PsqlModel):
-#     """
-#     Parameters for creating a vote
-#     """
+class CreateVote(PsqlModel):
+    """
+    Parameters for creating a vote
+    """
 
-#     response_id: int
-#     created_by_id: int
-#     vote_type: str
+    response_id: int
+    created_by_id: int
+    vote_type: VoteChoice
+
+
+class UpdateVote(PsqlModel):
+    """
+    Parameters for updating a vote
+    """
+
+    vote_id: int
+    vote_type: VoteChoice
+
+
+class DeleteVote(PsqlModel):
+    """
+    Parameters for updating a vote
+    """
+
+    vote_id: int

@@ -2,7 +2,16 @@ from typing import List
 from json import dumps
 from enum import Enum as PythonEnum
 
-from sqlalchemy import DateTime, ForeignKey, Table, Column, String, Integer, Enum
+from sqlalchemy import (
+    DateTime,
+    ForeignKey,
+    Table,
+    Column,
+    String,
+    Integer,
+    Enum,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -114,8 +123,8 @@ class Response(Base):
 
 
 class VoteChoice(PythonEnum):
-    AGREE = "agree"
-    DISAGREE = "disagree"
+    agree = "agree"
+    disagree = "disagree"
 
 
 class Vote(Base):
@@ -128,3 +137,4 @@ class Vote(Base):
 
     user: Mapped["User"] = relationship(back_populates="votes")
     response: Mapped["Response"] = relationship(back_populates="votes")
+    UniqueConstraint(created_by_id, response_id)

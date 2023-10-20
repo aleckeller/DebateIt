@@ -357,17 +357,17 @@ def _insert_response_votes():
             {
                 "response_id": 1,
                 "created_by_id": 1,
-                "vote_type": VoteChoice.AGREE,
+                "vote_type": VoteChoice.agree,
             },
             {
                 "response_id": 2,
                 "created_by_id": 1,
-                "vote_type": VoteChoice.DISAGREE,
+                "vote_type": VoteChoice.disagree,
             },
             {
                 "response_id": 1,
                 "created_by_id": 2,
-                "vote_type": VoteChoice.DISAGREE,
+                "vote_type": VoteChoice.disagree,
             },
         ],
     )

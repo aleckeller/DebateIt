@@ -147,35 +147,17 @@ Resources:
             Path: /response
             Method: post
             RestApiId: !Ref APIGateway
+        Vote:
+          Type: Api
+          Properties:
+            Path: /response/{response_id}/vote
+            Method: post
+            RestApiId: !Ref APIGateway
         GetDebate:
           Type: Api
           Properties:
             Path: /debate/{debate_id}/single
             Method: get
-            RestApiId: !Ref APIGateway
-        IncrementDebateResponseAgree:
-          Type: Api
-          Properties:
-            Path: /response/{response_id}/agree
-            Method: post
-            RestApiId: !Ref APIGateway
-        DecrementDebateResponseAgree:
-          Type: Api
-          Properties:
-            Path: /response/{response_id}/agree
-            Method: delete
-            RestApiId: !Ref APIGateway
-        IncrementDebateResponseDisagree:
-          Type: Api
-          Properties:
-            Path: /response/{response_id}/disagree
-            Method: post
-            RestApiId: !Ref APIGateway
-        DecrementDebateResponseDisagree:
-          Type: Api
-          Properties:
-            Path: /response/{response_id}/disagree
-            Method: delete
             RestApiId: !Ref APIGateway
         HelloEvent:
           Type: Api
