@@ -21,3 +21,13 @@ class CreateResponse(PsqlModel):
     created_by_id: int
     agree: int
     disagree: int
+
+
+# class CreateVote(PsqlModel):
+#     """
+#     Parameters for creating a vote
+#     """
+
+#     response_id: int
+#     created_by_id: int
+#     vote_type: str

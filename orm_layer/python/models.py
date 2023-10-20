@@ -1,6 +1,8 @@
 from typing import List
 from json import dumps
-from sqlalchemy import DateTime, ForeignKey, Table, Column, String, Integer
+from enum import Enum as PythonEnum
+
+from sqlalchemy import DateTime, ForeignKey, Table, Column, String, Integer, Enum
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -73,6 +75,7 @@ class User(Base):
     profile_picture_url: Mapped[str] = mapped_column(String, nullable=True)
 
     responses: Mapped[List["Response"]] = relationship(back_populates="user")
+    votes: Mapped[List["Vote"]] = relationship(back_populates="user")
 
     def __repr__(self):
         return f"""
@@ -85,17 +88,16 @@ class Response(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     body: Mapped[str] = mapped_column(String)
-    agree: Mapped[int] = mapped_column(Integer)
-    disagree: Mapped[int] = mapped_column(Integer)
     debate_id: Mapped[int] = mapped_column(ForeignKey("debate.id"))
     created_by_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
 
     debate: Mapped["Debate"] = relationship(back_populates="responses")
     user: Mapped["User"] = relationship(back_populates="responses")
+    votes: Mapped["Vote"] = relationship(back_populates="response")
 
     def __repr__(self):
         return f"""
-        <Response(id: {self.id}, body: {self.body}, agree: {self.agree}, disagree: {self.disagree},
+        <Response(id: {self.id}, body: {self.body},
         debate_id: {self.debate_id}, created_by_id: {self.created_by_id})>
         """
 
@@ -106,8 +108,23 @@ class Response(Base):
         return {
             "id": self.id,
             "body": self.body,
-            "agree": self.agree,
-            "disagree": self.disagree,
             "debate_id": self.debate_id,
             "created_by_id": self.created_by_id,
         }
+
+
+class VoteChoice(PythonEnum):
+    AGREE = "agree"
+    DISAGREE = "disagree"
+
+
+class Vote(Base):
+    __tablename__ = "vote"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    created_by_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    response_id: Mapped[int] = mapped_column(ForeignKey("response.id"))
+    vote_type: Mapped[PythonEnum] = mapped_column(Enum(VoteChoice))
+
+    user: Mapped["User"] = relationship(back_populates="votes")
+    response: Mapped["Response"] = relationship(back_populates="votes")

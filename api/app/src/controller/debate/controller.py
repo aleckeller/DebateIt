@@ -1,8 +1,24 @@
-from sqlalchemy import select, func, insert, update, case, literal, String, Case
+from sqlalchemy import (
+    select,
+    func,
+    insert,
+    update,
+    case,
+    literal,
+    String,
+    Case,
+)
 from sqlalchemy.orm import Session, aliased
 
 from ...service.files import FileService
-from models import Debate, DebateCategory, Response, User, debate_debate_category_table
+from models import (
+    Debate,
+    DebateCategory,
+    Response,
+    User,
+    debate_debate_category_table,
+    Vote,
+)
 from .model import CreateDebate, UploadFile, GetDebate
 
 
@@ -90,6 +106,31 @@ def upload_file(file_service: FileService, upload_file: UploadFile) -> dict:
     return file_service.upload(upload_file.file_bytes, upload_file.file_location)
 
 
+_vote_counts_subquery = (
+    select(
+        Vote.response_id,
+        func.sum(case((Vote.vote_type == "AGREE", 1), else_=0)).label("agree_count"),
+        func.sum(case((Vote.vote_type == "DISAGREE", 1), else_=0)).label(
+            "disagree_count"
+        ),
+    )
+    .group_by(Vote.response_id)
+    .alias("v")
+)
+
+
+def _vote_enabled_subquery(user_id: int, vote_type: str):
+    return (
+        select(Response.id)
+        .join(Vote, Vote.response_id == Response.id)
+        .filter(Vote.vote_type == vote_type)
+        .filter(Vote.created_by_id == user_id)
+        .distinct()
+        .alias("agree_responses")
+        .select()
+    )
+
+
 def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
     """
     Get a debate
@@ -115,12 +156,33 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
                             Response.id,
                             "body",
                             Response.body,
-                            "agree",
-                            Response.agree,
-                            "disagree",
-                            Response.disagree,
                             "created_by",
                             urcb_alias.username.label("created_by"),
+                            "agree",
+                            func.coalesce(_vote_counts_subquery.c.agree_count, 0),
+                            "disagree",
+                            func.coalesce(_vote_counts_subquery.c.disagree_count, 0),
+                            "agreeEnabled",
+                            case(
+                                (
+                                    Response.id.in_(
+                                        _vote_enabled_subquery(1, "AGREE")
+                                    ),  # TODO: Update user ID when authentication system is implemented
+                                    False,
+                                ),
+                                else_=True,
+                            ),
+                            "disagreeEnabled",
+                            case(
+                                (
+                                    Response.id.in_(
+                                        _vote_enabled_subquery(1, "DISAGREE")
+                                        # TODO: Update user ID when authentication system is implemented
+                                    ),
+                                    False,
+                                ),
+                                else_=True,
+                            ),
                         ).distinct()
                     ),
                 ),
@@ -131,9 +193,13 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
         )
         .outerjoin(Response, Debate.id == Response.debate_id)
         .outerjoin(DebateCategory, Debate.debate_categories)
+        .outerjoin(Vote, Response.id == Vote.response_id)
         .outerjoin(ucb_alias, Debate.created_by)
         .outerjoin(uw_alias, Debate.leader)
         .outerjoin(urcb_alias, Response.user)
+        .outerjoin(
+            _vote_counts_subquery, Response.id == _vote_counts_subquery.c.response_id
+        )
         .group_by(
             Debate.id,
             Debate.title,

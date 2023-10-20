@@ -14,6 +14,8 @@ from orm_layer.python.models import (
     DebateCategory,
     debate_debate_category_table,
     Response,
+    Vote,
+    VoteChoice,
 )
 from orm_layer.python.table_data import DEBATE_CATEGORIES
 
@@ -196,213 +198,176 @@ def _insert_responses():
         [
             {
                 "body": "A universal basic income (UBI) could provide financial security and eliminate poverty. It's a necessary step to ensure everyone's well-being.",
-                "agree": 12,
-                "disagree": 3,
                 "debate_id": 1,
                 "created_by_id": 1,
             },
             {
                 "body": "UBI may seem like a good idea, but it's fiscally irresponsible and can discourage people from working. It's not a practical solution.",
-                "agree": 2,
-                "disagree": 10,
                 "debate_id": 1,
                 "created_by_id": 2,
             },
             {
                 "body": "The current global approach to combating climate change is ineffective. We need a radical shift in strategy to address this urgent issue.",
-                "agree": 8,
-                "disagree": 6,
                 "debate_id": 2,
                 "created_by_id": 3,
             },
             {
                 "body": "We should continue with the current strategies and not make hasty changes. They are making a difference, albeit slowly.",
-                "agree": 5,
-                "disagree": 7,
                 "debate_id": 2,
                 "created_by_id": 4,
             },
             {
                 "body": "Online privacy is a fundamental right, and we should prioritize it over security. There are alternative ways to protect our nations.",
-                "agree": 10,
-                "disagree": 2,
                 "debate_id": 3,
                 "created_by_id": 5,
             },
             {
                 "body": "National security is paramount, and privacy rights need to be sacrificed for the greater good. We must protect our nations.",
-                "agree": 4,
-                "disagree": 6,
                 "debate_id": 3,
                 "created_by_id": 1,
             },
             {
                 "body": "Legalizing and regulating currently illegal drugs can reduce crime and create new sources of revenue for governments.",
-                "agree": 9,
-                "disagree": 3,
                 "debate_id": 4,
                 "created_by_id": 2,
             },
             {
                 "body": "Drug legalization can lead to increased addiction and societal problems. It's a dangerous path to take.",
-                "agree": 4,
-                "disagree": 7,
                 "debate_id": 4,
                 "created_by_id": 3,
             },
             {
                 "body": "The death penalty is inhumane and ineffective. It should be abolished in all civilized societies.",
-                "agree": 7,
-                "disagree": 3,
                 "debate_id": 5,
                 "created_by_id": 4,
             },
             {
                 "body": "The death penalty is a necessary punishment for the most heinous crimes. It serves as a deterrent and justice for the victims.",
-                "agree": 6,
-                "disagree": 4,
                 "debate_id": 5,
                 "created_by_id": 5,
             },
             {
                 "body": "Students should be required to wear uniforms in schools to promote discipline and reduce peer pressure based on clothing.",
-                "agree": 8,
-                "disagree": 2,
                 "debate_id": 6,
                 "created_by_id": 1,
             },
             {
                 "body": "School uniforms stifle individuality and self-expression. Students should have the freedom to choose their clothing.",
-                "agree": 3,
-                "disagree": 6,
                 "debate_id": 6,
                 "created_by_id": 2,
             },
             {
                 "body": "Social media is causing harm by promoting unrealistic standards and addictive behaviors. It's damaging society.",
-                "agree": 7,
-                "disagree": 4,
                 "debate_id": 7,
                 "created_by_id": 3,
             },
             {
                 "body": "Social media has connected people and allowed for the free exchange of ideas. It's a force for good in society.",
-                "agree": 5,
-                "disagree": 3,
                 "debate_id": 7,
                 "created_by_id": 4,
             },
             {
                 "body": "Professional athletes have the right to kneel during the national anthem to protest social injustice. It's an important form of expression.",
-                "agree": 9,
-                "disagree": 4,
                 "debate_id": 8,
                 "created_by_id": 5,
             },
             {
                 "body": "Athletes should not mix sports and politics. Kneeling during the national anthem is disrespectful to the country.",
-                "agree": 4,
-                "disagree": 7,
                 "debate_id": 8,
                 "created_by_id": 1,
             },
             {
                 "body": "Censorship of art and media is essential to protect society from harmful content, especially for children.",
-                "agree": 6,
-                "disagree": 5,
                 "debate_id": 9,
                 "created_by_id": 2,
             },
             {
                 "body": "Censorship limits creativity and infringes on freedom of expression. It's not the solution to societal problems.",
-                "agree": 4,
-                "disagree": 7,
                 "debate_id": 9,
                 "created_by_id": 3,
             },
             {
                 "body": "Genetically modified organisms (GMOs) have the potential to solve world hunger and improve crop yields. They should be allowed in the food supply.",
-                "agree": 8,
-                "disagree": 3,
                 "debate_id": 10,
                 "created_by_id": 4,
             },
             {
                 "body": "GMOs can have unknown health risks, and we should prioritize natural, organic food. They should not be allowed in the food supply.",
-                "agree": 4,
-                "disagree": 6,
                 "debate_id": 10,
                 "created_by_id": 5,
             },
             {
                 "body": "Homeschooling provides a more personalized and effective education. It should be a viable alternative to traditional public education.",
-                "agree": 7,
-                "disagree": 3,
                 "debate_id": 11,
                 "created_by_id": 1,
             },
             {
                 "body": "Traditional public education is essential for socialization and standardized learning. Homeschooling is not a better option.",
-                "agree": 5,
-                "disagree": 4,
                 "debate_id": 11,
                 "created_by_id": 2,
             },
             {
                 "body": "Access to healthcare is a fundamental human right. Every individual deserves equal and affordable healthcare.",
-                "agree": 9,
-                "disagree": 4,
                 "debate_id": 12,
                 "created_by_id": 3,
             },
             {
                 "body": "Healthcare is a service, not a right. The government should not be responsible for providing healthcare to everyone.",
-                "agree": 4,
-                "disagree": 7,
                 "debate_id": 12,
                 "created_by_id": 4,
             },
             {
                 "body": "Space exploration is a worthwhile investment that drives scientific progress and offers potential benefits for humanity.",
-                "agree": 8,
-                "disagree": 3,
                 "debate_id": 13,
                 "created_by_id": 5,
             },
             {
                 "body": "Space exploration is a costly endeavor with limited practical benefits for Earth. It's not a worthwhile investment.",
-                "agree": 4,
-                "disagree": 6,
                 "debate_id": 13,
                 "created_by_id": 1,
             },
             {
                 "body": "Voting should be mandatory for all eligible citizens to ensure full participation in democracy and representation.",
-                "agree": 7,
-                "disagree": 3,
                 "debate_id": 14,
                 "created_by_id": 2,
             },
             {
                 "body": "Mandatory voting infringes on individual freedom. Citizens should have the choice to participate or abstain.",
-                "agree": 4,
-                "disagree": 6,
                 "debate_id": 14,
                 "created_by_id": 3,
             },
             {
                 "body": "The legal drinking age should be lowered to encourage responsible drinking and reduce underage alcohol-related issues.",
-                "agree": 8,
-                "disagree": 3,
                 "debate_id": 15,
                 "created_by_id": 4,
             },
             {
                 "body": "Raising the legal drinking age can help protect young people from the harms of alcohol and reduce accidents.",
-                "agree": 6,
-                "disagree": 4,
                 "debate_id": 15,
                 "created_by_id": 5,
+            },
+        ],
+    )
+
+
+def _insert_response_votes():
+    DB_SESSION.execute(
+        insert(Vote),
+        [
+            {
+                "response_id": 1,
+                "created_by_id": 1,
+                "vote_type": VoteChoice.AGREE,
+            },
+            {
+                "response_id": 2,
+                "created_by_id": 1,
+                "vote_type": VoteChoice.DISAGREE,
+            },
+            {
+                "response_id": 1,
+                "created_by_id": 2,
+                "vote_type": VoteChoice.DISAGREE,
             },
         ],
     )
@@ -413,6 +378,7 @@ table_names = [
     DebateCategory.__table__,
     f"public.{User.__table__}",
     Response.__table__,
+    Vote.__table__,
 ]
 for name in table_names:
     DB_SESSION.execute(text(f"TRUNCATE TABLE {name} CASCADE;"))
@@ -423,6 +389,7 @@ _insert_debates()
 _insert_debate_categories()
 _insert_debate_debate_category_relationships()
 _insert_responses()
+_insert_response_votes()
 
 DB_SESSION.commit()
 DB_SESSION.close()
