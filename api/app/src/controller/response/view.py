@@ -42,7 +42,13 @@ def create_response_route():
 
     router.context["db_session"].commit()
 
-    return response.to_dict()
+    return {
+        **response.to_dict(),
+        "agree": 0,
+        "agreeEnabled": True,
+        "disagree": 0,
+        "disagreeEnabled": True,
+    }
 
 
 @router.post("/<response_id>/vote")
