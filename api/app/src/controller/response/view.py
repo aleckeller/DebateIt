@@ -35,7 +35,8 @@ def create_response_route():
         CreateResponse(
             body=request_body.get("body"),
             debate_id=request_body.get("debate_id"),
-            created_by_id=request_body.get("created_by_id"),
+            # Replace below once authentication is implemented
+            created_by_id=1,
         ),
     )
 
