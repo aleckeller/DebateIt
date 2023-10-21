@@ -20,8 +20,6 @@ class CreateResponse(PsqlModel):
     ]
     debate_id: int
     created_by_id: int
-    agree: int
-    disagree: int
 
 
 class CreateVote(PsqlModel):
