@@ -75,6 +75,9 @@ class DebateCategory(Base):
         <DebateCategory(id: {self.id}, name: {self.name})>
         """
 
+    def to_dict(self):
+        return {"id": self.id, "name": self.name}
+
 
 class User(Base):
     __tablename__ = "user"

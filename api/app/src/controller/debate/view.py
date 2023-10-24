@@ -15,6 +15,7 @@ from .controller import (
     update_file_location,
     upload_file,
     get_debate,
+    get_categories,
 )
 from .model import CreateDebate, UploadFile, GetDebate
 
@@ -45,7 +46,8 @@ def create_debate_route():
         CreateDebate(
             title=request_body.get("title"),
             summary=request_body.get("summary"),
-            created_by_id=request_body.get("created_by_id"),
+            # Update this when authentication is implemented
+            created_by_id=1,
             end_at=request_body.get("end_at", datetime.now() + timedelta(days=7)),
             category_ids=request_body.get("category_ids"),
         ),
@@ -89,3 +91,11 @@ def get_debate_route(debate_id: int):
     Returns single debate
     """
     return get_debate(router.context["db_session"], GetDebate(debate_id=debate_id))
+
+
+@router.get("/category/list")
+def get_categories_route():
+    """
+    Returns list of debate categories
+    """
+    return get_categories(router.context["db_session"])

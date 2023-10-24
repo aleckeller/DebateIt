@@ -245,3 +245,13 @@ def _get_end_at() -> Case:
         ),
         else_=(func.extract("minute", Debate.end_at - current_date).cast(String) + "m"),
     ).label("end_at")
+
+
+def get_categories(session: Session) -> list[str]:
+    """
+    Returns list of categories
+    """
+    debate_categories = (
+        session.query(DebateCategory).order_by(DebateCategory.name).all()
+    )
+    return [category.to_dict() for category in debate_categories]
