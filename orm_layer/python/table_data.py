@@ -9,7 +9,6 @@ DEBATE_CATEGORIES = [
     "Sports and Activism",
     "Censorship",
     "Food and Agriculture",
-    "Education",
     "Healthcare",
     "Space Exploration",
     "Voting and Elections",
