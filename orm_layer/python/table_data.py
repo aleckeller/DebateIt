@@ -13,4 +13,5 @@ DEBATE_CATEGORIES = [
     "Space Exploration",
     "Voting and Elections",
     "Alcohol Policy",
+    "Other",
 ]
