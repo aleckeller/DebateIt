@@ -93,26 +93,31 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
             DebatesView.picture_url,
             DebatesView.end_at,
             func.to_char(DebatesView.created_at, "MM-DD-YYYY").label("created_at"),
-            func.jsonb_agg(
-                func.jsonb_build_object(
-                    "id",
-                    ResponsesView.id,
-                    "body",
-                    ResponsesView.body,
-                    "created_by",
-                    ResponsesView.created_by,
-                    "agree",
-                    ResponsesView.agree,
-                    "disagree",
-                    ResponsesView.disagree,
-                    "agree_enabled",
-                    VoteAgree.id.is_(None),
-                    "disagree_enabled",
-                    VoteDisagree.id.is_(None),
-                )
+            case(
+                (func.count(ResponsesView.id) == 0, "[]"),
+                else_=(
+                    func.jsonb_agg(
+                        func.jsonb_build_object(
+                            "id",
+                            ResponsesView.id,
+                            "body",
+                            ResponsesView.body,
+                            "created_by",
+                            ResponsesView.created_by,
+                            "agree",
+                            ResponsesView.agree,
+                            "disagree",
+                            ResponsesView.disagree,
+                            "agree_enabled",
+                            VoteAgree.id.is_(None),
+                            "disagree_enabled",
+                            VoteDisagree.id.is_(None),
+                        )
+                    )
+                ),
             ).label("responses"),
         )
-        .join(ResponsesView, DebatesView.id == ResponsesView.debate_id)
+        .outerjoin(ResponsesView, DebatesView.id == ResponsesView.debate_id)
         .outerjoin(
             VoteAgree,
             (ResponsesView.id == VoteAgree.response_id)
