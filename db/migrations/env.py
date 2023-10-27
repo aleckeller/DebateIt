@@ -5,6 +5,11 @@ from sqlalchemy import create_engine
 
 from alembic import context
 from aws_lambda_powertools.utilities.parameters import get_secret
+from alembic_utils.replaceable_entity import register_entities
+
+from db.migrations.views import debates_view, responses_view
+
+register_entities([debates_view, responses_view])
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

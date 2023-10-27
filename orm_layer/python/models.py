@@ -1,5 +1,3 @@
-from typing import List
-from json import dumps
 from enum import Enum as PythonEnum
 
 from sqlalchemy import (
@@ -11,6 +9,7 @@ from sqlalchemy import (
     Integer,
     Enum,
     UniqueConstraint,
+    ARRAY,
 )
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
@@ -47,10 +46,10 @@ class Debate(Base):
 
     created_by: Mapped["User"] = relationship(foreign_keys=[created_by_id])
     leader: Mapped["User"] = relationship(foreign_keys=[leader_id])
-    debate_categories: Mapped[List["DebateCategory"]] = relationship(
+    debate_categories: Mapped[list["DebateCategory"]] = relationship(
         secondary=debate_debate_category_table, back_populates="debates"
     )
-    responses: Mapped[List["Response"]] = relationship(back_populates="debate")
+    responses: Mapped[list["Response"]] = relationship(back_populates="debate")
 
     def __repr__(self):
         return f"""
@@ -66,7 +65,7 @@ class DebateCategory(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(30))
 
-    debates: Mapped[List["Debate"]] = relationship(
+    debates: Mapped[list["Debate"]] = relationship(
         secondary=debate_debate_category_table, back_populates="debate_categories"
     )
 
@@ -86,8 +85,8 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(30), unique=True)
     profile_picture_url: Mapped[str] = mapped_column(String, nullable=True)
 
-    responses: Mapped[List["Response"]] = relationship(back_populates="user")
-    votes: Mapped[List["Vote"]] = relationship(back_populates="user")
+    responses: Mapped[list["Response"]] = relationship(back_populates="user")
+    votes: Mapped[list["Vote"]] = relationship(back_populates="user")
 
     def __repr__(self):
         return f"""
@@ -141,3 +140,59 @@ class Vote(Base):
     user: Mapped["User"] = relationship(back_populates="votes")
     response: Mapped["Response"] = relationship(back_populates="votes")
     UniqueConstraint(created_by_id, response_id)
+
+
+class DebatesView(Base):
+    __tablename__ = "debates_view"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String)
+    category_names: Mapped[list[str]] = mapped_column(ARRAY(String))
+    summary: Mapped[str] = mapped_column(String)
+    picture_url: Mapped[str] = mapped_column(String)
+    response_count: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True))
+    created_by: Mapped[str] = mapped_column(String)
+    leader: Mapped[str] = mapped_column(String)
+    end_at: Mapped[str] = mapped_column(String)
+
+    def to_dict(self):
+        """
+        Convert debate view object to dict
+        """
+        return {
+            "id": self.id,
+            "title": self.title,
+            "category_names": self.category_names,
+            "summary": self.summary,
+            "picture_url": self.picture_url,
+            "response_count": self.response_count,
+            "created_at": self.created_at.strftime("%m-%d-%Y"),
+            "created_by": self.created_by,
+            "leader": self.leader,
+            "end_at": self.end_at,
+        }
+
+
+class ResponsesView(Base):
+    __tablename__ = "responses_view"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    debate_id: Mapped[int] = mapped_column(Integer)
+    body: Mapped[str] = mapped_column(String)
+    created_by: Mapped[str] = mapped_column(String)
+    agree: Mapped[int] = mapped_column(Integer)
+    disagree: Mapped[int] = mapped_column(Integer)
+
+    def to_dict(self):
+        """
+        Convert response view object to dict
+        """
+        return {
+            "id": self.id,
+            "debate_id": self.debate_id,
+            "body": self.body,
+            "created_by": self.created_by,
+            "agree": self.agree,
+            "disagree": self.disagree,
+        }
