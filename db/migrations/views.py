@@ -44,8 +44,10 @@ responses_view_definition = """
             GROUP BY v.response_id
         )
         
-        SELECT r.id, r.debate_id, r.body, ucbi.username as created_by, COALESCE(vc.agree_count, 0) as agree, 
-        COALESCE(vc.disagree_count, 0) as disagree
+        SELECT r.id, r.debate_id, r.body, ucbi.username as created_by, ucbi.id as created_by_id,
+        COALESCE(vc.agree_count, 0) as agree, 
+        COALESCE(vc.disagree_count, 0) as disagree,
+        COALESCE(vc.agree_count, 0) - COALESCE(vc.disagree_count, 0) as vote_difference
         FROM response r
         JOIN "user" ucbi ON ucbi.id = r.created_by_id
         LEFT JOIN vote_counts vc ON vc.response_id = r.id
