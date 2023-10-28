@@ -93,6 +93,8 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
             DebatesView.picture_url,
             DebatesView.end_at,
             DebatesView.created_by,
+            DebatesView.leader,
+            DebatesView.response_count,
             func.to_char(DebatesView.created_at, "MM-DD-YYYY").label("created_at"),
             case(
                 (func.count(ResponsesView.id) == 0, "[]"),
@@ -141,6 +143,8 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
             DebatesView.end_at,
             DebatesView.created_at,
             DebatesView.created_by,
+            DebatesView.leader,
+            DebatesView.response_count,
         )
     )
 
