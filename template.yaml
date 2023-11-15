@@ -73,6 +73,11 @@ Resources:
       TracingEnabled: true
       BinaryMediaTypes:
         - "*~1*"
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: arn:aws:cognito-idp:us-east-1:703898521754:userpool/us-east-1_XuXaYtPDM
   ORMLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
