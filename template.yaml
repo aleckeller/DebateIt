@@ -88,7 +88,7 @@ Resources:
       UserAttributeUpdateSettings:
         AttributesRequireVerificationBeforeUpdate:
           - email
-      UsernameAttributes: !Ref usernameAttributes
+      UsernameAttributes: email
       UsernameConfiguration:
         CaseSensitive: false
       UserPoolName: !Sub "debateit-user-pool-${EnvironmentParameter}"
@@ -157,7 +157,7 @@ Resources:
         DefaultAuthorizer: CognitoAuthorizer
         Authorizers:
           CognitoAuthorizer:
-            UserPoolArn: arn:aws:cognito-idp:us-east-1:703898521754:userpool/us-east-1_XuXaYtPDM
+            UserPoolArn: !GetAtt UserPool.Arn
   ORMLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
