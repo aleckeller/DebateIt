@@ -88,8 +88,6 @@ Resources:
       UserAttributeUpdateSettings:
         AttributesRequireVerificationBeforeUpdate:
           - email
-      UsernameAttributes:
-        - email
       UsernameConfiguration:
         CaseSensitive: false
       UserPoolName: !Sub "debateit-user-pool-${EnvironmentParameter}"
