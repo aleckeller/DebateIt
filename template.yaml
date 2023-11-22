@@ -66,6 +66,86 @@ Resources:
       SecretId: !Ref DebateItDBSecret
       TargetId: !Ref DebateItDB
       TargetType: AWS::RDS::DBInstance
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      AutoVerifiedAttributes:
+        - email
+      EmailVerificationMessage: "Your verification code is {####}"
+      EmailVerificationSubject: "Your verification code"
+      MfaConfiguration: "OFF"
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+          RequireUppercase: false
+      Schema:
+        - Mutable: true
+          Name: email
+          Required: true
+      UserAttributeUpdateSettings:
+        AttributesRequireVerificationBeforeUpdate:
+          - email
+      UsernameAttributes: !Ref usernameAttributes
+      UsernameConfiguration:
+        CaseSensitive: false
+      UserPoolName: !Sub "debateit-user-pool-${EnvironmentParameter}"
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: !Sub "debateit-user-pool-client-${EnvironmentParameter}"
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        RefreshToken: days
+    DependsOn:
+      - UserPool
+  AuthRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ""
+            Effect: Deny
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: "sts:AssumeRoleWithWebIdentity"
+      RoleName: !Sub "debateit-auth-role-${EnvironmentParameter}"
+  UnauthRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ""
+            Effect: Deny
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: "sts:AssumeRoleWithWebIdentity"
+      RoleName: !Sub "debateit-unauth-role-${EnvironmentParameter}"
+  IdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      AllowUnauthenticatedIdentities: false
+      CognitoIdentityProviders:
+        - ClientId: !Ref UserPoolClient
+          ProviderName: !Sub
+            - "cognito-idp.${region}.amazonaws.com/${client}"
+            - region: !Ref "AWS::Region"
+              client: !Ref UserPool
+      IdentityPoolName: !Sub "debateit-identity-pool-${EnvironmentParameter}"
+  IdentityPoolRoleMap:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId: !Ref IdentityPool
+      Roles:
+        unauthenticated: !GetAtt UnauthRole.Arn
+        authenticated: !GetAtt AuthRole.Arn
+    DependsOn:
+      - IdentityPool
   APIGateway:
     Type: AWS::Serverless::Api
     Properties:
