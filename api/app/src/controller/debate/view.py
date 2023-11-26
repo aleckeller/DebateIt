@@ -29,6 +29,7 @@ def get_debates_route():
     """
     Returns list of debates
     """
+    print(router.current_event["requestContext"])
     return get_debates(router.context["db_session"])
 
 

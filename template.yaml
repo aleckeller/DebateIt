@@ -79,6 +79,12 @@ Resources:
       Handler: view.lambda_handler
       Policies:
         - SecretsManagerReadWrite
+  PostUserSignUpPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PostUserSignUpFunction
+      Action: lambda:InvokeFunction
+      Principal: cognito-idp.amazonaws.com
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
