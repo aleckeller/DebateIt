@@ -66,6 +66,19 @@ Resources:
       SecretId: !Ref DebateItDBSecret
       TargetId: !Ref DebateItDB
       TargetType: AWS::RDS::DBInstance
+  PostUserSignUpFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures: [x86_64]
+      Timeout: 900
+      Runtime: python3.9
+      CodeUri: functions/post_user_sign_up/
+      Environment:
+        Variables:
+          LOG_LEVEL: !Sub "${LogLevel}"
+      Handler: view.lambda_handler
+      Policies:
+        - SecretsManagerReadWrite
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
@@ -73,6 +86,8 @@ Resources:
         - email
       EmailVerificationMessage: "Your verification code is {####}"
       EmailVerificationSubject: "Your verification code"
+      LambdaConfig:
+        PostConfirmation: !GetAtt PostUserSignUpFunction.Arn
       MfaConfiguration: "OFF"
       Policies:
         PasswordPolicy:
