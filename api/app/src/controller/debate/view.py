@@ -40,14 +40,15 @@ def create_debate_route():
     request_body = (
         router.current_event.json_body if router.current_event.get("body") else {}
     )
+    created_by_id = router.current_event["requestContext"]["authorizer"]["claims"][
+        "sub"
+    ]
     id = create_debate(
         router.context["db_session"],
         CreateDebate(
             title=request_body.get("title"),
             summary=request_body.get("summary"),
-            created_by_id=router.current_event["requestContext"]["authorizer"][
-                "claims"
-            ]["sub"],
+            created_by_id=created_by_id,
             end_at=request_body.get("end_at", datetime.now() + timedelta(days=7)),
             category_ids=request_body.get("category_ids"),
         ),
@@ -90,7 +91,14 @@ def get_debate_route(debate_id: int):
     """
     Returns single debate
     """
-    return get_debate(router.context["db_session"], GetDebate(debate_id=debate_id))
+    user_id = router.current_event["requestContext"]["authorizer"]["claims"]["sub"]
+    return get_debate(
+        router.context["db_session"],
+        GetDebate(
+            debate_id=debate_id,
+            user_id=user_id,
+        ),
+    )
 
 
 @router.get("/category/list")

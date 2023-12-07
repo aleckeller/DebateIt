@@ -29,21 +29,20 @@ def create_response_route():
     request_body = (
         router.current_event.json_body if router.current_event.get("body") else {}
     )
-
+    user_id = router.current_event["requestContext"]["authorizer"]["claims"]["sub"]
     response = create_response(
         router.context["db_session"],
         CreateResponse(
             body=request_body.get("body"),
             debate_id=request_body.get("debate_id"),
-            # Replace below once authentication is implemented
-            created_by_id=1,
+            created_by_id=user_id,
         ),
     )
 
     router.context["db_session"].commit()
 
     return {
-        **response.to_dict(),
+        **response,
         "agree": 0,
         "agreeEnabled": True,
         "disagree": 0,
@@ -61,11 +60,12 @@ def vote_route(response_id: int):
     """
     parameters = router.current_event.get("queryStringParameters") or {}
     session = router.context["db_session"]
+    user_id = router.current_event["requestContext"]["authorizer"]["claims"]["sub"]
 
     vote_type = parameters.get("vote_type")
     vote = CreateVote(
         response_id=response_id,
-        created_by_id=1,  # TODO: Update this when authentication is implemented
+        created_by_id=user_id,
         vote_type=vote_type,
     )
     existing_vote = check_if_vote_exists(session, vote)

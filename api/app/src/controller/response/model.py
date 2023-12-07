@@ -1,4 +1,5 @@
 from typing import Annotated
+from uuid import UUID
 
 from pydantic import StringConstraints
 
@@ -19,7 +20,7 @@ class CreateResponse(PsqlModel):
         ),
     ]
     debate_id: int
-    created_by_id: int
+    created_by_id: UUID
 
 
 class CreateVote(PsqlModel):
@@ -28,7 +29,7 @@ class CreateVote(PsqlModel):
     """
 
     response_id: int
-    created_by_id: int
+    created_by_id: UUID
     vote_type: VoteChoice
 
 

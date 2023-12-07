@@ -81,9 +81,6 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
     VoteAgree = aliased(Vote)
     VoteDisagree = aliased(Vote)
 
-    # Remove this once auth is implemented
-    created_by_id = 1
-
     query = (
         session.query(
             DebatesView.id,
@@ -125,13 +122,13 @@ def get_debate(session: Session, get_debate_model: GetDebate) -> dict:
             VoteAgree,
             (ResponsesView.id == VoteAgree.response_id)
             & (VoteAgree.vote_type == "agree")
-            & (VoteAgree.created_by_id == created_by_id),
+            & (VoteAgree.created_by_id == get_debate_model.user_id),
         )
         .outerjoin(
             VoteDisagree,
             (ResponsesView.id == VoteDisagree.response_id)
             & (VoteDisagree.vote_type == "disagree")
-            & (VoteDisagree.created_by_id == created_by_id),
+            & (VoteDisagree.created_by_id == get_debate_model.user_id),
         )
         .filter(DebatesView.id == get_debate_model.debate_id)
         .group_by(

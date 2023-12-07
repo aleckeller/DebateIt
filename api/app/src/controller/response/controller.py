@@ -9,10 +9,16 @@ def create_response(session: Session, response: CreateResponse) -> int:
     """
     Creates a response
     """
-    return session.execute(
+    result: Response = session.execute(
         insert(Response).returning(Response),
         response.bind_vars(),
     ).first()[0]
+    return {
+        "id": result.id,
+        "body": result.body,
+        "debate_id": result.debate_id,
+        "created_by_id": str(result.created_by_id),
+    }
 
 
 def check_if_vote_exists(session: Session, vote_model: CreateVote) -> Vote:

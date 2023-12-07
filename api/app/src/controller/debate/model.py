@@ -4,6 +4,7 @@ Pydantic models for debates
 
 from typing import Annotated
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import StringConstraints
 
@@ -29,7 +30,7 @@ class CreateDebate(PsqlModel):
             strip_whitespace=True,
         ),
     ]
-    created_by_id: int
+    created_by_id: UUID
     end_at: datetime
     category_ids: list[int]
 
@@ -50,3 +51,4 @@ class GetDebate(PsqlModel):
     """
 
     debate_id: int
+    user_id: UUID
