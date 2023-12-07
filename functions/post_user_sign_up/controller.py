@@ -15,4 +15,4 @@ def create_user(session: Session, create_user_model: CreateUser) -> int:
         constraint="user_pkey",
         set_={col: getattr(stmt.excluded, col) for col in user_attributes},
     )
-    return session.execute(stmt).first()[0].id
+    session.execute(stmt)

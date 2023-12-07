@@ -14,14 +14,14 @@ def lambda_handler(event, context):
     db_session = _get_db_session(
         get_secret(environ["DB_SECRET_NAME"], transform="json")
     )
-    user_id = create_user(
+    create_user(
         db_session,
         CreateUser(
             id=event["request"]["userAttributes"]["sub"], username=event["userName"]
         ),
     )
     db_session.commit()
-    return {"id": str(user_id)}
+    return event
 
 
 # Get SQLAlchemy Session
