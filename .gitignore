@@ -163,3 +163,4 @@ cython_debug/
 packaged.yaml
 .vscode
 local-env-vars.json
+events

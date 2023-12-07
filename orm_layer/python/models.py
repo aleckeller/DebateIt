@@ -1,4 +1,5 @@
 from enum import Enum as PythonEnum
+from uuid import UUID
 
 from sqlalchemy import (
     DateTime,
@@ -39,10 +40,10 @@ class Debate(Base):
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    created_by_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    created_by_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))
     end_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True))
     picture_url: Mapped[str] = mapped_column(String, nullable=True)
-    leader_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=True)
+    leader_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"), nullable=True)
 
     created_by: Mapped["User"] = relationship(foreign_keys=[created_by_id])
     leader: Mapped["User"] = relationship(foreign_keys=[leader_id])
@@ -81,7 +82,7 @@ class DebateCategory(Base):
 class User(Base):
     __tablename__ = "user"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(30), unique=True)
     profile_picture_url: Mapped[str] = mapped_column(String, nullable=True)
 
@@ -100,7 +101,7 @@ class Response(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     body: Mapped[str] = mapped_column(String)
     debate_id: Mapped[int] = mapped_column(ForeignKey("debate.id"))
-    created_by_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    created_by_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))
 
     debate: Mapped["Debate"] = relationship(back_populates="responses")
     user: Mapped["User"] = relationship(back_populates="responses")
@@ -133,7 +134,7 @@ class Vote(Base):
     __tablename__ = "vote"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    created_by_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    created_by_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))
     response_id: Mapped[int] = mapped_column(ForeignKey("response.id"))
     vote_type: Mapped[PythonEnum] = mapped_column(Enum(VoteChoice))
 

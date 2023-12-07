@@ -23,11 +23,11 @@ BEGIN
        SELECT
            CASE
                WHEN COUNT(*) > 1 THEN NULL
-               ELSE MAX(rv.created_by_id)
+               ELSE rv.created_by_id
            END
        FROM responses_view AS rv
        WHERE d.id = rv.debate_id
-       GROUP BY rv.vote_difference
+       GROUP BY rv.vote_difference, rv.created_by_id
        ORDER BY rv.vote_difference DESC
        LIMIT 1
    )

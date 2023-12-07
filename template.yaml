@@ -66,6 +66,16 @@ Resources:
       SecretId: !Ref DebateItDBSecret
       TargetId: !Ref DebateItDB
       TargetType: AWS::RDS::DBInstance
+  ORMLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: orm-layer
+      Description: SQLAlchemy models and utilities
+      ContentUri: ./orm_layer/
+      CompatibleRuntimes:
+        - python3.9
+      LicenseInfo: "MIT"
+      RetentionPolicy: Retain
   PostUserSignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -73,9 +83,12 @@ Resources:
       Timeout: 900
       Runtime: python3.9
       CodeUri: functions/post_user_sign_up/
+      Layers:
+        - !Ref ORMLayer
       Environment:
         Variables:
           LOG_LEVEL: !Sub "${LogLevel}"
+          DB_SECRET_NAME: !Ref DebateItDBSecret
       Handler: view.lambda_handler
       Policies:
         - SecretsManagerReadWrite
@@ -178,16 +191,6 @@ Resources:
         Authorizers:
           CognitoAuthorizer:
             UserPoolArn: !GetAtt UserPool.Arn
-  ORMLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: orm-layer
-      Description: SQLAlchemy models and utilities
-      ContentUri: ./orm_layer/
-      CompatibleRuntimes:
-        - python3.9
-      LicenseInfo: "MIT"
-      RetentionPolicy: Retain
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:

@@ -1,8 +1,8 @@
 """debate_response_views_triggers
 
-Revision ID: 5753d73ef30b
-Revises: 6ced321652c1
-Create Date: 2023-10-27 21:44:18.886436
+Revision ID: e743238383fd
+Revises: 29162aef2b84
+Create Date: 2023-11-25 23:33:29.648349
 
 """
 from typing import Sequence, Union
@@ -19,8 +19,8 @@ from alembic_utils.pg_view import PGView
 from sqlalchemy import text as sql_text
 
 # revision identifiers, used by Alembic.
-revision: str = "5753d73ef30b"
-down_revision: Union[str, None] = "6ced321652c1"
+revision: str = "e743238383fd"
+down_revision: Union[str, None] = "29162aef2b84"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -44,7 +44,7 @@ def upgrade() -> None:
     public_update_leader_function = PGFunction(
         schema="public",
         signature="update_leader_function()",
-        definition="RETURNS TRIGGER AS $$\nDECLARE\n   debate_id INT;\n   response_id INT;\nBEGIN\n    IF TG_OP = 'INSERT' THEN\n        response_id := NEW.response_id;\n    ELSIF TG_OP = 'DELETE' THEN\n        response_id := OLD.response_id;\n    END IF;\n   RAISE NOTICE 'Debug message\\: Variable value = %', debate_id;\n\n   SELECT rv.debate_id INTO debate_id\n   FROM responses_view AS rv\n   WHERE rv.id = response_id;\n\n   UPDATE debate AS d\n   SET leader_id = (\n       SELECT\n           CASE\n               WHEN COUNT(*) > 1 THEN NULL\n               ELSE MAX(rv.created_by_id)\n           END\n       FROM responses_view AS rv\n       WHERE d.id = rv.debate_id\n       GROUP BY rv.vote_difference\n       ORDER BY rv.vote_difference DESC\n       LIMIT 1\n   )\n   WHERE d.id = debate_id;\n   RETURN NEW;\nEND;\n$$ LANGUAGE plpgsql",
+        definition="RETURNS TRIGGER AS $$\nDECLARE\n   debate_id INT;\n   response_id INT;\nBEGIN\n    IF TG_OP = 'INSERT' THEN\n        response_id := NEW.response_id;\n    ELSIF TG_OP = 'DELETE' THEN\n        response_id := OLD.response_id;\n    END IF;\n   RAISE NOTICE 'Debug message\\: Variable value = %', debate_id;\n\n   SELECT rv.debate_id INTO debate_id\n   FROM responses_view AS rv\n   WHERE rv.id = response_id;\n\n   UPDATE debate AS d\n   SET leader_id = (\n       SELECT\n           CASE\n               WHEN COUNT(*) > 1 THEN NULL\n               ELSE rv.created_by_id\n           END\n       FROM responses_view AS rv\n       WHERE d.id = rv.debate_id\n       GROUP BY rv.vote_difference, rv.created_by_id\n       ORDER BY rv.vote_difference DESC\n       LIMIT 1\n   )\n   WHERE d.id = debate_id;\n   RETURN NEW;\nEND;\n$$ LANGUAGE plpgsql",
     )
     op.create_entity(public_update_leader_function)
 
@@ -373,36 +373,6 @@ def upgrade() -> None:
     )
     op.drop_entity(public_vote_debateitdbowner_update)
 
-    public_alembic_version_debateitdbowner_delete = PGGrantTable(
-        schema="public",
-        table="alembic_version",
-        columns=[],
-        role="debateitdbowner",
-        grant="DELETE",
-        with_grant_option=True,
-    )
-    op.drop_entity(public_alembic_version_debateitdbowner_delete)
-
-    public_alembic_version_debateitdbowner_truncate = PGGrantTable(
-        schema="public",
-        table="alembic_version",
-        columns=[],
-        role="debateitdbowner",
-        grant="TRUNCATE",
-        with_grant_option=True,
-    )
-    op.drop_entity(public_alembic_version_debateitdbowner_truncate)
-
-    public_alembic_version_debateitdbowner_trigger = PGGrantTable(
-        schema="public",
-        table="alembic_version",
-        columns=[],
-        role="debateitdbowner",
-        grant="TRIGGER",
-        with_grant_option=True,
-    )
-    op.drop_entity(public_alembic_version_debateitdbowner_trigger)
-
     public_user_debateitdbowner_delete = PGGrantTable(
         schema="public",
         table="user",
@@ -523,36 +493,6 @@ def upgrade() -> None:
     )
     op.drop_entity(public_debate_debate_category_table_debateitdbowner_trigger)
 
-    public_vote_debateitdbowner_delete = PGGrantTable(
-        schema="public",
-        table="vote",
-        columns=[],
-        role="debateitdbowner",
-        grant="DELETE",
-        with_grant_option=True,
-    )
-    op.drop_entity(public_vote_debateitdbowner_delete)
-
-    public_vote_debateitdbowner_truncate = PGGrantTable(
-        schema="public",
-        table="vote",
-        columns=[],
-        role="debateitdbowner",
-        grant="TRUNCATE",
-        with_grant_option=True,
-    )
-    op.drop_entity(public_vote_debateitdbowner_truncate)
-
-    public_vote_debateitdbowner_trigger = PGGrantTable(
-        schema="public",
-        table="vote",
-        columns=[],
-        role="debateitdbowner",
-        grant="TRIGGER",
-        with_grant_option=True,
-    )
-    op.drop_entity(public_vote_debateitdbowner_trigger)
-
     public_response_debateitdbowner_delete = PGGrantTable(
         schema="public",
         table="response",
@@ -583,40 +523,100 @@ def upgrade() -> None:
     )
     op.drop_entity(public_response_debateitdbowner_trigger)
 
-    # ### end Alembic commands ###
-
-
-def downgrade() -> None:
-    # ### commands auto generated by Alembic - please adjust! ###
-    public_response_debateitdbowner_trigger = PGGrantTable(
+    public_vote_debateitdbowner_delete = PGGrantTable(
         schema="public",
-        table="response",
-        columns=[],
-        role="debateitdbowner",
-        grant="TRIGGER",
-        with_grant_option=True,
-    )
-    op.create_entity(public_response_debateitdbowner_trigger)
-
-    public_response_debateitdbowner_truncate = PGGrantTable(
-        schema="public",
-        table="response",
-        columns=[],
-        role="debateitdbowner",
-        grant="TRUNCATE",
-        with_grant_option=True,
-    )
-    op.create_entity(public_response_debateitdbowner_truncate)
-
-    public_response_debateitdbowner_delete = PGGrantTable(
-        schema="public",
-        table="response",
+        table="vote",
         columns=[],
         role="debateitdbowner",
         grant="DELETE",
         with_grant_option=True,
     )
-    op.create_entity(public_response_debateitdbowner_delete)
+    op.drop_entity(public_vote_debateitdbowner_delete)
+
+    public_vote_debateitdbowner_truncate = PGGrantTable(
+        schema="public",
+        table="vote",
+        columns=[],
+        role="debateitdbowner",
+        grant="TRUNCATE",
+        with_grant_option=True,
+    )
+    op.drop_entity(public_vote_debateitdbowner_truncate)
+
+    public_vote_debateitdbowner_trigger = PGGrantTable(
+        schema="public",
+        table="vote",
+        columns=[],
+        role="debateitdbowner",
+        grant="TRIGGER",
+        with_grant_option=True,
+    )
+    op.drop_entity(public_vote_debateitdbowner_trigger)
+
+    public_alembic_version_debateitdbowner_delete = PGGrantTable(
+        schema="public",
+        table="alembic_version",
+        columns=[],
+        role="debateitdbowner",
+        grant="DELETE",
+        with_grant_option=True,
+    )
+    op.drop_entity(public_alembic_version_debateitdbowner_delete)
+
+    public_alembic_version_debateitdbowner_truncate = PGGrantTable(
+        schema="public",
+        table="alembic_version",
+        columns=[],
+        role="debateitdbowner",
+        grant="TRUNCATE",
+        with_grant_option=True,
+    )
+    op.drop_entity(public_alembic_version_debateitdbowner_truncate)
+
+    public_alembic_version_debateitdbowner_trigger = PGGrantTable(
+        schema="public",
+        table="alembic_version",
+        columns=[],
+        role="debateitdbowner",
+        grant="TRIGGER",
+        with_grant_option=True,
+    )
+    op.drop_entity(public_alembic_version_debateitdbowner_trigger)
+
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    # ### commands auto generated by Alembic - please adjust! ###
+    public_alembic_version_debateitdbowner_trigger = PGGrantTable(
+        schema="public",
+        table="alembic_version",
+        columns=[],
+        role="debateitdbowner",
+        grant="TRIGGER",
+        with_grant_option=True,
+    )
+    op.create_entity(public_alembic_version_debateitdbowner_trigger)
+
+    public_alembic_version_debateitdbowner_truncate = PGGrantTable(
+        schema="public",
+        table="alembic_version",
+        columns=[],
+        role="debateitdbowner",
+        grant="TRUNCATE",
+        with_grant_option=True,
+    )
+    op.create_entity(public_alembic_version_debateitdbowner_truncate)
+
+    public_alembic_version_debateitdbowner_delete = PGGrantTable(
+        schema="public",
+        table="alembic_version",
+        columns=[],
+        role="debateitdbowner",
+        grant="DELETE",
+        with_grant_option=True,
+    )
+    op.create_entity(public_alembic_version_debateitdbowner_delete)
 
     public_vote_debateitdbowner_trigger = PGGrantTable(
         schema="public",
@@ -647,6 +647,36 @@ def downgrade() -> None:
         with_grant_option=True,
     )
     op.create_entity(public_vote_debateitdbowner_delete)
+
+    public_response_debateitdbowner_trigger = PGGrantTable(
+        schema="public",
+        table="response",
+        columns=[],
+        role="debateitdbowner",
+        grant="TRIGGER",
+        with_grant_option=True,
+    )
+    op.create_entity(public_response_debateitdbowner_trigger)
+
+    public_response_debateitdbowner_truncate = PGGrantTable(
+        schema="public",
+        table="response",
+        columns=[],
+        role="debateitdbowner",
+        grant="TRUNCATE",
+        with_grant_option=True,
+    )
+    op.create_entity(public_response_debateitdbowner_truncate)
+
+    public_response_debateitdbowner_delete = PGGrantTable(
+        schema="public",
+        table="response",
+        columns=[],
+        role="debateitdbowner",
+        grant="DELETE",
+        with_grant_option=True,
+    )
+    op.create_entity(public_response_debateitdbowner_delete)
 
     public_debate_debate_category_table_debateitdbowner_trigger = PGGrantTable(
         schema="public",
@@ -767,36 +797,6 @@ def downgrade() -> None:
         with_grant_option=True,
     )
     op.create_entity(public_user_debateitdbowner_delete)
-
-    public_alembic_version_debateitdbowner_trigger = PGGrantTable(
-        schema="public",
-        table="alembic_version",
-        columns=[],
-        role="debateitdbowner",
-        grant="TRIGGER",
-        with_grant_option=True,
-    )
-    op.create_entity(public_alembic_version_debateitdbowner_trigger)
-
-    public_alembic_version_debateitdbowner_truncate = PGGrantTable(
-        schema="public",
-        table="alembic_version",
-        columns=[],
-        role="debateitdbowner",
-        grant="TRUNCATE",
-        with_grant_option=True,
-    )
-    op.create_entity(public_alembic_version_debateitdbowner_truncate)
-
-    public_alembic_version_debateitdbowner_delete = PGGrantTable(
-        schema="public",
-        table="alembic_version",
-        columns=[],
-        role="debateitdbowner",
-        grant="DELETE",
-        with_grant_option=True,
-    )
-    op.create_entity(public_alembic_version_debateitdbowner_delete)
 
     public_vote_debateitdbowner_update = PGGrantTable(
         schema="public",
@@ -1126,7 +1126,7 @@ def downgrade() -> None:
     public_update_leader_function = PGFunction(
         schema="public",
         signature="update_leader_function()",
-        definition="RETURNS TRIGGER AS $$\nDECLARE\n   debate_id INT;\n   response_id INT;\nBEGIN\n    IF TG_OP = 'INSERT' THEN\n        response_id := NEW.response_id;\n    ELSIF TG_OP = 'DELETE' THEN\n        response_id := OLD.response_id;\n    END IF;\n   RAISE NOTICE 'Debug message\\: Variable value = %', debate_id;\n\n   SELECT rv.debate_id INTO debate_id\n   FROM responses_view AS rv\n   WHERE rv.id = response_id;\n\n   UPDATE debate AS d\n   SET leader_id = (\n       SELECT\n           CASE\n               WHEN COUNT(*) > 1 THEN NULL\n               ELSE MAX(rv.created_by_id)\n           END\n       FROM responses_view AS rv\n       WHERE d.id = rv.debate_id\n       GROUP BY rv.vote_difference\n       ORDER BY rv.vote_difference DESC\n       LIMIT 1\n   )\n   WHERE d.id = debate_id;\n   RETURN NEW;\nEND;\n$$ LANGUAGE plpgsql",
+        definition="RETURNS TRIGGER AS $$\nDECLARE\n   debate_id INT;\n   response_id INT;\nBEGIN\n    IF TG_OP = 'INSERT' THEN\n        response_id := NEW.response_id;\n    ELSIF TG_OP = 'DELETE' THEN\n        response_id := OLD.response_id;\n    END IF;\n   RAISE NOTICE 'Debug message\\: Variable value = %', debate_id;\n\n   SELECT rv.debate_id INTO debate_id\n   FROM responses_view AS rv\n   WHERE rv.id = response_id;\n\n   UPDATE debate AS d\n   SET leader_id = (\n       SELECT\n           CASE\n               WHEN COUNT(*) > 1 THEN NULL\n               ELSE rv.created_by_id\n           END\n       FROM responses_view AS rv\n       WHERE d.id = rv.debate_id\n       GROUP BY rv.vote_difference, rv.created_by_id\n       ORDER BY rv.vote_difference DESC\n       LIMIT 1\n   )\n   WHERE d.id = debate_id;\n   RETURN NEW;\nEND;\n$$ LANGUAGE plpgsql",
     )
     op.drop_entity(public_update_leader_function)
 
@@ -1143,4 +1143,5 @@ def downgrade() -> None:
         definition="SELECT d.id, d.title, ARRAY_AGG(DISTINCT dc.name) as category_names,\n        d.summary, d.picture_url, COUNT(r.id) as response_count,\n        d.created_at, ucbi.username as created_by, ul.username as leader,\n            (\n                CASE\n                    WHEN NOW() > d.end_at THEN 'Finished'\n                    WHEN EXTRACT(DAY FROM d.end_at - NOW()) > 0 THEN\n                        EXTRACT(DAY FROM d.end_at - NOW()) || 'd ' ||\n                        EXTRACT(HOUR FROM d.end_at - NOW()) || 'h ' ||\n                        EXTRACT(MINUTE FROM d.end_at - NOW()) || 'm'\n                    WHEN EXTRACT(HOUR FROM d.end_at - NOW()) > 0 THEN\n                        EXTRACT(HOUR FROM d.end_at - NOW()) || 'h ' ||\n                        EXTRACT(MINUTE FROM d.end_at - NOW()) || 'm'\n                    ELSE\n                        EXTRACT(MINUTE FROM d.end_at - NOW()) || 'm'\n                END\n            ) AS end_at\n        FROM debate d\n        LEFT JOIN debate_debate_category_table ddct ON ddct.debate_id = d.id\n        LEFT JOIN debate_category dc ON dc.id = ddct.debate_category_id\n        LEFT JOIN response r ON r.debate_id = d.id\n        LEFT JOIN \"user\" ucbi ON ucbi.id = d.created_by_id\n        LEFT JOIN \"user\" ul ON ul.id = d.leader_id\n        GROUP BY d.id, ucbi.username, ul.username\n        ORDER BY d.id",
     )
     op.drop_entity(public_debates_view)
+
     # ### end Alembic commands ###

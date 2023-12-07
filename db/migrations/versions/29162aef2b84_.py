@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 6ced321652c1
+Revision ID: 29162aef2b84
 Revises: 
-Create Date: 2023-10-26 23:03:25.384697
+Create Date: 2023-11-25 23:23:47.387715
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '6ced321652c1'
+revision: str = '29162aef2b84'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,7 +26,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('username', sa.String(length=30), nullable=False),
     sa.Column('profile_picture_url', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
@@ -37,10 +37,10 @@ def upgrade() -> None:
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('summary', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('created_by_id', sa.Integer(), nullable=False),
+    sa.Column('created_by_id', sa.Uuid(), nullable=False),
     sa.Column('end_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('picture_url', sa.String(), nullable=True),
-    sa.Column('leader_id', sa.Integer(), nullable=True),
+    sa.Column('leader_id', sa.Uuid(), nullable=True),
     sa.ForeignKeyConstraint(['created_by_id'], ['user.id'], ),
     sa.ForeignKeyConstraint(['leader_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -56,14 +56,14 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('body', sa.String(), nullable=False),
     sa.Column('debate_id', sa.Integer(), nullable=False),
-    sa.Column('created_by_id', sa.Integer(), nullable=False),
+    sa.Column('created_by_id', sa.Uuid(), nullable=False),
     sa.ForeignKeyConstraint(['created_by_id'], ['user.id'], ),
     sa.ForeignKeyConstraint(['debate_id'], ['debate.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('vote',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('created_by_id', sa.Integer(), nullable=False),
+    sa.Column('created_by_id', sa.Uuid(), nullable=False),
     sa.Column('response_id', sa.Integer(), nullable=False),
     sa.Column('vote_type', sa.Enum('agree', 'disagree', name='votechoice'), nullable=False),
     sa.ForeignKeyConstraint(['created_by_id'], ['user.id'], ),
