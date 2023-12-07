@@ -29,7 +29,6 @@ def get_debates_route():
     """
     Returns list of debates
     """
-    print(router.current_event["requestContext"])
     return get_debates(router.context["db_session"])
 
 
@@ -41,14 +40,14 @@ def create_debate_route():
     request_body = (
         router.current_event.json_body if router.current_event.get("body") else {}
     )
-
     id = create_debate(
         router.context["db_session"],
         CreateDebate(
             title=request_body.get("title"),
             summary=request_body.get("summary"),
-            # Update this when authentication is implemented
-            created_by_id=1,
+            created_by_id=router.current_event["requestContext"]["authorizer"][
+                "claims"
+            ]["sub"],
             end_at=request_body.get("end_at", datetime.now() + timedelta(days=7)),
             category_ids=request_body.get("category_ids"),
         ),
