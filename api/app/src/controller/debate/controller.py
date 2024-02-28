@@ -17,14 +17,24 @@ from models import (
     DebatesView,
     ResponsesView,
 )
-from .model import CreateDebate, UploadFile, GetDebate
+from .model import CreateDebate, UploadFile, GetDebate, GetDebates
 
 
-def get_debates(session: Session) -> list[dict]:
+def get_debates(session: Session, get_debates: GetDebates) -> list[dict]:
     """
     Returns list of debates
     """
-    debates = session.query(DebatesView).order_by(DebatesView.end_at).all()
+    active_condition = (
+        (DebatesView.end_at != "Finished")
+        if get_debates.is_active
+        else (DebatesView.end_at == "Finished")
+    )
+    debates = (
+        session.query(DebatesView)
+        .filter(active_condition)
+        .order_by(DebatesView.end_at)
+        .all()
+    )
     return [debate.to_dict() for debate in debates]
 
 

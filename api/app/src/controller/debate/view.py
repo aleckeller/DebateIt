@@ -17,7 +17,7 @@ from .controller import (
     get_debate,
     get_categories,
 )
-from .model import CreateDebate, UploadFile, GetDebate
+from .model import CreateDebate, UploadFile, GetDebate, GetDebates
 
 # pylint: enable=import-error
 
@@ -29,7 +29,12 @@ def get_debates_route():
     """
     Returns list of debates
     """
-    return get_debates(router.context["db_session"])
+    parameters = router.current_event.get("queryStringParameters") or {}
+
+    return get_debates(
+        router.context["db_session"],
+        GetDebates(is_active=parameters.get("is_active", True)),
+    )
 
 
 @router.post("")

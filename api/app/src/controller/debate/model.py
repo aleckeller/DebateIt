@@ -52,3 +52,11 @@ class GetDebate(PsqlModel):
 
     debate_id: int
     user_id: UUID
+
+
+class GetDebates(PsqlModel):
+    """
+    Parameters for getting debates
+    """
+
+    is_active: bool
